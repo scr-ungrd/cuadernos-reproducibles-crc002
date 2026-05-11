@@ -91,6 +91,8 @@ project:
     - file: article.ipynb
 
   # Configuración de numeración y referencias cruzadas
+  jupyter: false
+
   numbering:
     figures: true
     equations: true

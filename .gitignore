@@ -17,5 +17,6 @@ __pycache__/
 .env
 *.env
 
-# Large archives (datos locales, no van al repo)
+# Datos generados localmente
+data/
 riesgos_olas_calor.zip
