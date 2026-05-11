@@ -29,6 +29,8 @@ jobs:
 
       - name: Build HTML
         run: myst build --html
+        env:
+          BASE_URL: /cuadernos-reproducibles-crc002
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
