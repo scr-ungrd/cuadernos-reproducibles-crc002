@@ -80,15 +80,15 @@ project:
     - format: jats
       output: exports/article.xml
       article: article.ipynb
+      sub_articles:
+        - notebooks/observable-exports.ipynb
     - format: meca
       output: exports/article.meca.zip
       article: article.ipynb
 
-  # Tabla de contenido — sólo article.ipynb por ahora; cuando se agreguen
-  # sub-notebooks de cada fase (estilo data-screening.ipynb del CRC001),
-  # se enumeran aquí
   toc:
     - file: article.ipynb
+    - file: notebooks/observable-exports.ipynb
 
   # Configuración de numeración y referencias cruzadas
   jupyter: false
