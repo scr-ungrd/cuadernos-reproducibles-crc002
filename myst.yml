@@ -5,7 +5,7 @@
 version: 1
 
 project:
-  id: riesgos-olas-calor-cartagena
+  id: cuadernos-reproducibles-crc002
   title: "Riesgo por olas de calor urbano en Cartagena, Bolívar bajo escenarios de cambio climático"
   short_title: "Olas de calor Cartagena"
   description: >-
@@ -63,7 +63,7 @@ project:
 
   open_access: true
 
-  github: https://github.com/scr-ungrd/riesgos-olas-calor-cartagena
+  github: https://github.com/scr-ungrd/cuadernos-reproducibles-crc002
 
   # DOI a diligenciar tras release v0.1.0 en Zenodo
   # doi: ""
@@ -128,13 +128,13 @@ site:
     - title: "Inicio del proyecto"
       url: https://scr-ungrd.github.io/riesgos
     - title: "Repositorio"
-      url: https://github.com/scr-ungrd/riesgos-olas-calor-cartagena
+      url: https://github.com/scr-ungrd/cuadernos-reproducibles-crc002
   actions:
     - title: "Abrir en Colab"
-      url: https://colab.research.google.com/github/scr-ungrd/riesgos-olas-calor-cartagena/blob/main/article.ipynb
+      url: https://colab.research.google.com/github/scr-ungrd/cuadernos-reproducibles-crc002/blob/main/article.ipynb
       static: false
     - title: "Abrir en Binder"
-      url: https://mybinder.org/v2/gh/scr-ungrd/riesgos-olas-calor-cartagena/main?filepath=article.ipynb
+      url: https://mybinder.org/v2/gh/scr-ungrd/cuadernos-reproducibles-crc002/main?filepath=article.ipynb
       static: false
     # "Descargar PDF" se habilita tras ejecutar `myst build --pdf`
     # - title: "Descargar PDF"
