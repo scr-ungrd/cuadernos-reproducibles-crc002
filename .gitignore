@@ -1,0 +1,21 @@
+# Build output
+_build/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Jupyter
+.jupyter/
+
+# Env
+.env
+*.env
+
+# Large archives (datos locales, no van al repo)
+riesgos_olas_calor.zip

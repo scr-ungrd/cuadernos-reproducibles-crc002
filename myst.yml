@@ -1,0 +1,140 @@
+# =====================================================================
+# MyST configuration — Riesgos: Olas de calor urbano · Cartagena
+# Alineado con el patrón del cuaderno CRC001-Montería (scr-ungrd)
+# =====================================================================
+version: 1
+
+project:
+  id: riesgos-olas-calor-cartagena
+  title: "Riesgo por olas de calor urbano en Cartagena, Bolívar bajo escenarios de cambio climático"
+  short_title: "Olas de calor Cartagena"
+  description: >-
+    Cuaderno reproducible para evaluación de riesgo por olas de calor en Cartagena
+    de Indias, bajo escenarios SSP2-4.5 y SSP5-8.5 del CMIP6. Implementa un
+    workflow piloto de 6 fases alineado con el marco IPCC AR6 y los instrumentos
+    del Sistema Nacional de Gestión del Riesgo de Desastres de Colombia.
+
+  authors:
+    - name: Mauricio Romero
+      orcid: 0000-0003-3282-0372
+      email: mauricio.romero@gestiondelriesgo.gov.co
+      corresponding: true
+      affiliations:
+        - ungrd
+
+  affiliations:
+    - id: ungrd
+      institution: Unidad Nacional para la Gestión del Riesgo de Desastres
+      department: Subdirección de Conocimiento del Riesgo
+      city: Bogotá
+      country: Colombia
+      url: https://www.gestiondelriesgo.gov.co
+      ror: ""  # diligenciar cuando se obtenga ROR institucional
+
+  date: 2026-05-11
+
+  keywords:
+    - olas de calor
+    - cambio climático
+    - Cartagena
+    - Caribe colombiano
+    - estrés térmico
+    - CMIP6
+    - NEX-GDDP-CMIP6
+    - Landsat
+    - urban heat island
+    - Earth Engine
+    - CLIMADA
+    - CLIMAAX
+    - IPCC AR6
+    - PNGRD
+    - Marco de Sendai
+
+  subject: "Climate & disaster risk assessment"
+
+  venue:
+    title: "Riesgos · UNGRD Cuadernos Reproducibles"
+    short_title: "Riesgos UNGRD"
+    url: https://scr-ungrd.github.io/riesgos
+
+  license:
+    code: Apache-2.0
+    content: CC-BY-4.0
+
+  open_access: true
+
+  github: https://github.com/scr-ungrd/riesgos-olas-calor-cartagena
+
+  # DOI a diligenciar tras release v0.1.0 en Zenodo
+  # doi: ""
+
+  bibliography:
+    - references.bib
+
+  # Exports — formatos generados con `myst build --all`
+  exports:
+    - format: pdf
+      template: agu-journal
+      output: exports/article.pdf
+      article: article.ipynb
+    - format: jats
+      output: exports/article.xml
+      article: article.ipynb
+    - format: meca
+      output: exports/article.meca.zip
+      article: article.ipynb
+
+  # Tabla de contenido — sólo article.ipynb por ahora; cuando se agreguen
+  # sub-notebooks de cada fase (estilo data-screening.ipynb del CRC001),
+  # se enumeran aquí
+  toc:
+    - file: article.ipynb
+
+  # Configuración de numeración y referencias cruzadas
+  numbering:
+    figures: true
+    equations: true
+    tables: true
+    sections: false
+
+  # Links cortos para referencias inline en el texto
+  abbreviations:
+    UNGRD: Unidad Nacional para la Gestión del Riesgo de Desastres
+    SNGRD: Sistema Nacional de Gestión del Riesgo de Desastres
+    PNGRD: Plan Nacional de Gestión del Riesgo de Desastres
+    IPCC: Intergovernmental Panel on Climate Change
+    AR6: Sixth Assessment Report
+    CMIP6: Coupled Model Intercomparison Project Phase 6
+    SSP: Shared Socioeconomic Pathways
+    LST: Land Surface Temperature
+    UHI: Urban Heat Island
+    HWF: Heat Wave Frequency
+    HWML: Heat Wave Max Length
+    GEE: Google Earth Engine
+    NWS: Northwestern South America (IPCC AR6 Atlas)
+    IDEAM: Instituto de Hidrología, Meteorología y Estudios Ambientales
+    DANE: Departamento Administrativo Nacional de Estadística
+
+site:
+  template: book-theme
+  options:
+    folders: true
+    favicon: ""
+    logo: ""
+    logo_text: "Riesgos · UNGRD"
+  nav:
+    - title: "Inicio del proyecto"
+      url: https://scr-ungrd.github.io/riesgos
+    - title: "Repositorio"
+      url: https://github.com/scr-ungrd/riesgos-olas-calor-cartagena
+  actions:
+    - title: "Abrir en Colab"
+      url: https://colab.research.google.com/github/scr-ungrd/riesgos-olas-calor-cartagena/blob/main/article.ipynb
+      static: false
+    - title: "Abrir en Binder"
+      url: https://mybinder.org/v2/gh/scr-ungrd/riesgos-olas-calor-cartagena/main?filepath=article.ipynb
+      static: false
+    # "Descargar PDF" se habilita tras ejecutar `myst build --pdf`
+    # - title: "Descargar PDF"
+    #   url: /exports/article.pdf
+    #   static: true

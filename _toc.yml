@@ -1,0 +1,15 @@
+# =====================================================================
+# Tabla de contenido — Riesgos · Olas de calor urbano · Cartagena
+# La TOC efectiva está en `myst.yml` (sección project.toc).
+# Este archivo mantiene compatibilidad con Jupyter Book legacy.
+# =====================================================================
+format: jb-book
+root: article
+chapters:
+  - file: article
+  # Cuando se agreguen sub-notebooks por fase, enumerarlos aquí:
+  # - file: notebooks/02_uhi_extendido
+  # - file: notebooks/03_heat_stress
+  # - file: notebooks/04_exposicion
+  # - file: notebooks/05_vulnerabilidad
+  # - file: notebooks/06_impact_risk
