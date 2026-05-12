@@ -65,6 +65,7 @@ project:
 
   github: https://github.com/scr-ungrd/cuadernos-reproducibles-crc002
   binder: https://mybinder.org/v2/gh/scr-ungrd/cuadernos-reproducibles-crc002/main
+  banner: ./images/banner.png
 
   # DOI a diligenciar tras release v0.1.0 en Zenodo
   # doi: ""
@@ -119,11 +120,8 @@ project:
     DANE: Departamento Administrativo Nacional de Estadística
 
 site:
-  template: book-theme
+  template: article-theme
   options:
-    folders: true
-    favicon: ""
-    logo: ""
     logo_text: "Riesgos · UNGRD"
   nav:
     - title: "Inicio del proyecto"
