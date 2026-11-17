@@ -36,6 +36,7 @@ Ninguno.
 ## Validación técnica y limitaciones
 
 - Comprobaciones: control de calidad de las observaciones por profundidad equivalente, verificación de la deformación de Okada contra `pyrocko` (error menor que 1e-5 m) y contraste con resultados publicados.
+- Licencia de los valores de Herd et al. (1981), revisión del 2026-11-17 (análisis documental, no dictamen jurídico): el artículo es de Science y está protegido, pero el repositorio no copia su texto ni sus tablas; solo registra magnitudes de ola y tiempos de llegada, que son hechos, con la cita completa y la procedencia de cada valor. Un conjunto de hechos citado con atribución no exige permiso del editor. No se reproducen figuras ni tablas del artículo.
 - Limitaciones: sección «Limitaciones y trabajo futuro» del artículo. El escenario sísmico usa parámetros supuestos y las observaciones de 1979 se contradicen entre fuentes (Herd et al. y NOAA/NGDC).
 - El cuaderno es un ejercicio sin validar por una persona experta; no debe usarse para tomar decisiones.
 
