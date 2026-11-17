@@ -1,5 +1,21 @@
 # Cambios
 
+## Sin publicar
+
+**Agregado**
+
+- Carpeta `metadata/`: `sources.csv`, `data_catalog.csv`, `DATA_DICTIONARY.md`, `descargas.csv` (sumas SHA-256) y el archivo RDLS 1.0.0 de las observaciones.
+- `README.md`, `DATA_STATEMENT.md`, `CITATION.cff`, `AI_USE.md` y `scripts/registrar_descargas.py`.
+- Secciones de disponibilidad de datos y declaración de uso de IA en el artículo.
+
+**Cambiado**
+
+- `environment.yml`: se quita el canal `defaults`; todos los paquetes están en `conda-forge`.
+
+**Pendiente**
+
+- Confirmar la licencia del mosaico de NOAA/NCEI y de las observaciones, aplicar la prueba CARE y archivar un *release* en Zenodo.
+
 ## 2.0.0 (2026-11-02)
 
 **Correcciones**

@@ -1,0 +1,94 @@
+{
+  "id": "https://github.com/scr-ungrd/cuadernos-reproducibles-crc002/tree/main/data#observaciones-1979",
+  "title": "Observaciones del tsunami de Tumaco del 12 de diciembre de 1979 (8 estaciones)",
+  "description": "Run-up y tiempo de arribo del tsunami de 1979 en ocho estaciones del Pacífico colombiano y ecuatoriano, usados para contrastar la simulación. Los valores se heredaron de la versión 1 y no están verificados contra las fuentes primarias; varias coordenadas son aproximadas.",
+  "risk_data_type": [
+    "hazard"
+  ],
+  "publisher": {
+    "name": "Subdirección para el Conocimiento del Riesgo, Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD)",
+    "url": "https://scr-ungrd.github.io/cuadernos-reproducibles-crc002/"
+  },
+  "contact_point": {
+    "name": "Subdirección para el Conocimiento del Riesgo",
+    "email": "conocimiento@gestiondelriesgo.gov.co"
+  },
+  "creator": {
+    "name": "Subdirección para el Conocimiento del Riesgo, Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD)",
+    "url": "https://github.com/scr-ungrd"
+  },
+  "spatial": {
+    "scale": "regional",
+    "countries": [
+      "COL",
+      "ECU"
+    ],
+    "gazetteer_entries": [
+      {
+        "id": "52835",
+        "scheme": "DIVIPOLA",
+        "description": "San Andrés de Tumaco, Nariño"
+      }
+    ],
+    "bbox": [
+      -80.97,
+      -2.2,
+      -77.02,
+      3.88
+    ]
+  },
+  "temporal": {
+    "start": "1979-12-12",
+    "end": "1979-12-12"
+  },
+  "license": "Sin licencia declarada por las fuentes (por confirmar)",
+  "rights": "Datos de observación tomados de la literatura (Herd et al., 1981) y de la base de tsunamis de NOAA/NGDC; sin verificar.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "id": "observaciones-1979",
+      "title": "Observaciones de run-up y tiempo de arribo",
+      "description": "Ocho filas con estación, coordenadas, run-up (m) y tiempo de arribo (min).",
+      "download_url": "https://raw.githubusercontent.com/scr-ungrd/cuadernos-reproducibles-crc002/main/data/observaciones_1979.csv",
+      "format": "CSV",
+      "temporal": {
+        "start": "1979-12-12",
+        "end": "1979-12-12"
+      }
+    }
+  ],
+  "hazard": {
+    "event_sets": [
+      {
+        "id": "tsunami-1979",
+        "hazards": [
+          {
+            "id": "tsunami-1979-runup",
+            "type": "tsunami",
+            "process": "tsunami",
+            "intensity_measure": "Rh_tsi:m"
+          }
+        ],
+        "analysis_type": "empirical",
+        "calculation_method": "observed"
+      }
+    ]
+  },
+  "lineage": {
+    "description": "Valores transcritos de la versión 1 del cuaderno a partir de Herd et al. (1981) y de la base de tsunamis de NOAA/NGDC; no se han contrastado con las fuentes primarias (véase data/README.md). Tres estaciones se excluyen de la comparación por quedar tierra adentro o fuera del dominio.",
+    "sources": [
+      {
+        "id": "herd-1981",
+        "name": "The great Tumaco, Colombia earthquake of 12 December 1979",
+        "url": "https://doi.org/10.1126/science.211.4481.441",
+        "citation": "Herd, D. G., Youd, T. L., Meyer, H., Arango, J. L., Person, W. J., y Mendoza, C. (1981). The great Tumaco, Colombia earthquake of 12 December 1979. Science, 211(4481), 441–445. https://doi.org/10.1126/science.211.4481.441",
+        "type": "dataset"
+      },
+      {
+        "id": "noaa-ngdc-tsunamis",
+        "name": "Base de tsunamis de NOAA/NGDC",
+        "type": "dataset"
+      }
+    ]
+  }
+}

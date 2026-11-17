@@ -279,6 +279,13 @@ explícito lo que falta para pasar de un escenario de propagación a un análisi
 - **Código:** <https://github.com/scr-ungrd/cuadernos-reproducibles-crc002> (licencia MIT; el constructor de los cuadernos está en `scripts/construir_cuadernos.py`).
 - **Elevación:** recorte de {cite:t}`noaa_dem_mosaic` en `data/dem_tumaco_noaa_15s.tif`.
 - **Observaciones históricas (sin verificar):** `data/observaciones_1979.csv`.
+- **Metadatos:** las fuentes y sus condiciones están en `metadata/sources.csv`, el catálogo y el diccionario de datos en `metadata/`, las sumas de verificación en `metadata/descargas.csv` y los metadatos RDLS de las observaciones en `metadata/rdls/`. La declaración completa está en `DATA_STATEMENT.md`.
+- **Licencias:** código bajo MIT; texto y figuras bajo CC BY 4.0. La licencia del mosaico de NOAA/NCEI y de las observaciones está por confirmar.
+- **DOI:** esta versión aún no tiene DOI; falta archivar un *release* en Zenodo.
+
+## Declaración de uso de inteligencia artificial
+
+El desarrollo de este cuaderno contó con la asistencia de Claude Sonnet 5.5 (Anthropic), según el historial de commits del repositorio. El detalle de los usos y de la revisión humana se registra en `AI_USE.md`.
 
 ```{bibliography}
 ```

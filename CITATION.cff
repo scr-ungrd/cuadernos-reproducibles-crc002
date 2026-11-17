@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "Si usa este cuaderno, cítelo con los metadatos de este archivo."
+type: software
+title: "Simulación del tsunami de Tumaco de 1979 (versión 2)"
+version: "2.0.0"
+date-released: "2026-11-02"
+authors:
+  - name: "Subdirección para el Conocimiento del Riesgo, Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD)"
+repository-code: "https://github.com/scr-ungrd/cuadernos-reproducibles-crc002"
+url: "https://scr-ungrd.github.io/cuadernos-reproducibles-crc002/"
+# doi: "10.5281/zenodo.<completar tras archivar el release>"
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - tsunami
+  - Tumaco
+  - Pacífico colombiano
+  - ecuaciones de aguas someras
+  - modelo de Okada
+  - gestión del riesgo de desastres
