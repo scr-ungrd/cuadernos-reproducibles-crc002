@@ -9,7 +9,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 - **Uso previsto:** estimar el tiempo de arribo y comparar escenarios de la propagación del tsunami del 12 de diciembre de 1979 hacia Tumaco, con fines educativos y de método. Por qué un modelo físico: el evento tiene pocas observaciones y no permite entrenar un modelo estadístico.
 - **Usos no previstos:** mapas de amenaza o de inundación (las LSWE no calculan inundación en tierra), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
 - **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 60 minutos de simulación.
-- **Revisión previa a una decisión:** debe revisar el resultado una persona experta en tsunamis de la SCR. <confirmar quién>
+- **Revisión previa a una decisión:** debe revisar el resultado una persona experta en tsunamis de la SCR. La revisión la coordina Mauricio Romero Torres (SCR-UNGRD).
 
 ## 2. Datos del modelo
 
@@ -52,12 +52,12 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 - **No hacer daño:** una amplitud simulada de 8 m en Tumaco podría malinterpretarse como una cota de inundación o usarse para fijar zonas seguras. El artículo lo advierte («Alcance: qué se puede y qué no se puede concluir») y el resultado no debe usarse para decisiones.
 - **Sesgos:** el escenario usa una sola fuente supuesta y las observaciones son pocas; no hay cobertura de otros eventos.
-- **Comunidades:** el área incluye territorios con presencia de comunidades étnicas. <confirmar si se requiere consulta o autorización>
+- **Comunidades:** el área incluye territorios con presencia de comunidades étnicas. Sí se requiere consulta o autorización antes de usar el escenario para decisiones.
 - **Explicabilidad:** el modelo es físico y sus ecuaciones están en el artículo.
 
 ## 8. Documentación y ciclo de vida
 
 - `README.md`, `CHANGELOG.md` (versionado semántico), `CITATION.cff`, `DATA_STATEMENT.md` y `AI_USE.md`.
-- **Obsolescencia:** el modelo se reemplaza cuando haya una versión no lineal con la distribución de deslizamiento de Poveda y Pulido (2019) y observaciones verificadas. <confirmar quién decide>
+- **Obsolescencia:** el modelo se reemplaza cuando haya una versión no lineal con la distribución de deslizamiento de Poveda y Pulido (2019) y observaciones verificadas. Decide Mauricio Romero Torres (SCR-UNGRD).
 - **Uso de IA:** declarado en `AI_USE.md`.
 - No se publica en un repositorio de modelos (no hay pesos).

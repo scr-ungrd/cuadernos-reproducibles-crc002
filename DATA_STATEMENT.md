@@ -24,7 +24,7 @@ Ninguno.
 ## Revisión CARE
 
 - Los datos son una batimetría y observaciones de run-up de un evento; no contienen datos personales ni conocimiento local o tradicional.
-- El área de estudio (Tumaco y el Pacífico sur colombiano) incluye territorios con presencia de comunidades étnicas. ¿Se requiere consulta o autorización para publicar el escenario? <confirmar>.
+- El área de estudio (Tumaco y el Pacífico sur colombiano) incluye territorios con presencia de comunidades étnicas. Sí: se requiere consulta o autorización antes de usar el escenario para decisiones o comunicación a las comunidades; este cuaderno es un ejercicio de reproducibilidad y no sustituye ese proceso.
 
 ## Disponibilidad de código
 
@@ -42,4 +42,4 @@ Ninguno.
 ## Compromiso de preservación
 
 - Responsable: Subdirección para el Conocimiento del Riesgo, UNGRD (conocimiento@gestiondelriesgo.gov.co).
-- Los datos se conservarán al menos cinco años después de la publicación. <confirmar el compromiso institucional>
+- Los datos se conservarán al menos cinco años después de la publicación. La SCR-UNGRD asume ese compromiso (confirmado el 2026-11-17).

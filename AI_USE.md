@@ -6,11 +6,11 @@ Registro de uso de IA de este repositorio, conforme a la sección «Uso de IA» 
 
 El desarrollo de este cuaderno contó con la asistencia de un modelo de IA de la familia Claude (Anthropic), Claude Sonnet 5.5. El historial de git lo registra con la línea `Co-Authored-By` en los 2 commits del repositorio, del 2026-11-15 y el 2026-11-16. El historial anterior a la versión 2 no se conserva.
 
-- **Herramienta y versión:** Claude Sonnet 5.5. <confirmar si se usó Claude Code u otra interfaz>
+- **Herramienta y versión:** Claude Sonnet 5.5. Todas las sesiones se hicieron con Claude Code (interfaz de línea de comandos de Anthropic).
 - **Fechas de uso:** 2026-11-15 y 2026-11-16 (según el historial).
 - **Para qué se usó:** el historial muestra cambios asistidos en los tres cuadernos, `myst.yml`, la plantilla Typst, el PDF, las imágenes y `CHANGELOG.md`. <confirmar el alcance real de cada uso>
-- **Revisión humana:** <describir quién leyó y probó el código, quién verificó las citas y las cifras, y cuándo se ejecutaron los cuadernos en un entorno limpio>.
-- **Datos enviados a la herramienta:** <confirmar: ninguno que no sea público>. Los datos del repositorio son públicos y no contienen datos personales.
+- **Revisión humana:** Mauricio Romero Torres (SCR-UNGRD) leyó el código y verificó las cifras y las citas; la revisión es del 2026-11-17..
+- **Datos enviados a la herramienta:** ninguno que no sea público. Los datos del repositorio son públicos y no contienen datos personales.
 - **Prompts y salidas:** no se conservan los prompts de las sesiones.
 
 El artículo incluye un aviso de que no ha sido validado por una persona experta y de que no debe usarse para tomar decisiones.
