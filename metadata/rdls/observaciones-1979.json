@@ -1,7 +1,7 @@
 {
   "id": "https://doi.org/10.5281/zenodo.24322478#observaciones-1979",
   "title": "Observaciones del tsunami de Tumaco del 12 de diciembre de 1979 (12 lugares)",
-  "description": "Run-up y tiempo observados del tsunami de 1979 en doce lugares del Pacífico colombiano y ecuatoriano, con la procedencia de cada valor (Herd et al., 1981 y base de run-ups de NOAA/NGDC, que no coinciden entre sí), usados para contrastar la simulación como rango y no como validación.",
+  "description": "Run-up y tiempos de arribo observados del tsunami del 12 de diciembre de 1979 en 12 lugares del Pacífico colombiano y ecuatoriano, con la procedencia de cada valor. Herd et al. (1981) y NOAA/NGDC no coinciden en varios lugares; los valores no se promedian.",
   "risk_data_type": [
     "hazard"
   ],
@@ -41,16 +41,29 @@
     "start": "1979-12-12",
     "end": "1979-12-12"
   },
-  "license": "Sin licencia declarada por las fuentes (por confirmar)",
-  "rights": "Datos de observación tomados de la literatura (Herd et al., 1981) y de la base de tsunamis de NOAA/NGDC; sin verificar.",
-  "version": "2.0.0",
+  "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "rights": "Registros de NOAA/NGDC: CC0 (política de datos abiertos de NCEI). Valores de Herd et al. (1981): hechos citados con atribución; no se copian su texto ni sus tablas (revisión del 2026-11-17, análisis documental).",
+  "version": "2.2.0",
   "resources": [
     {
       "id": "observaciones-1979",
       "title": "Observaciones de run-up y tiempo de arribo",
-      "description": "Ocho filas con estación, coordenadas, run-up (m) y tiempo de arribo (min).",
+      "description": "Doce filas con lugar, coordenadas, run-up de Herd et al. y de NOAA/NGDC (m), tiempo de arribo (min) y su tipo, y el identificador del registro de NOAA.",
       "download_url": "https://raw.githubusercontent.com/scr-ungrd/cuadernos-reproducibles-crc002/main/data/observaciones_1979.csv",
       "format": "CSV",
+      "temporal": {
+        "start": "1979-12-12",
+        "end": "1979-12-12"
+      },
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    {
+      "id": "noaa-runups-1979",
+      "title": "Registros de run-up de NOAA/NGDC del 1979-12-12 (Colombia y Ecuador)",
+      "description": "Registros de la base de run-ups de tsunamis de NOAA/NGDC consultados el 2026-11-16, tal como los devuelve la API.",
+      "download_url": "https://raw.githubusercontent.com/scr-ungrd/cuadernos-reproducibles-crc002/main/data/noaa_runups_1979.csv",
+      "format": "CSV",
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
       "temporal": {
         "start": "1979-12-12",
         "end": "1979-12-12"
@@ -75,7 +88,7 @@
     ]
   },
   "lineage": {
-    "description": "Valores transcritos de la versión 1 del cuaderno a partir de Herd et al. (1981) y de la base de tsunamis de NOAA/NGDC; no se han contrastado con las fuentes primarias (véase data/README.md). Tres estaciones se excluyen de la comparación por quedar tierra adentro o fuera del dominio.",
+    "description": "Los valores se reconstruyeron en la versión 2.2.0 con la procedencia de cada uno: run-up y tiempos de Herd et al. (1981, Science 211:441) y registros de la base de run-ups de NOAA/NGDC (consulta del 2026-11-16, copia en data/noaa_runups_1979.csv). Cuando las fuentes difieren se conservan ambos valores. Los lugares tierra adentro o fuera del dominio se excluyen de la comparación (véase data/README.md).",
     "sources": [
       {
         "id": "herd-1981",
@@ -86,8 +99,9 @@
       },
       {
         "id": "noaa-ngdc-tsunamis",
-        "name": "Base de tsunamis de NOAA/NGDC",
-        "type": "dataset"
+        "name": "Base de run-ups de tsunamis de NOAA/NGDC",
+        "type": "dataset",
+        "url": "https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/runups"
       }
     ]
   }

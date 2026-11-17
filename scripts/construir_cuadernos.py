@@ -150,6 +150,7 @@ eje X al guardar el DEM y eso espejaba los mapas; aquí no se invierte nada.
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 def a_utm(ruta, dx=450.0):
+    """Reproyecta el DEM a UTM 17N con celdas de `dx` m (interpolación bilineal). Devuelve la malla (m, NaN sin dato) y su transformación afín."""
     with rasterio.open(ruta) as src:
         tf, w, h = calculate_default_transform(src.crs, CRS_UTM, src.width, src.height, *src.bounds, resolution=dx)
         arr = np.full((h, w), np.nan, 'float32')
@@ -256,6 +257,7 @@ def okada_uz(x, y, d, L, W, strike_deg, dip_deg, rake_deg, slip, nu=0.25):
     p = Y * cd + d_inf * sd
     q = Y * sd - d_inf * cd
     def f(xi, eta):
+        """Contribución de una esquina del plano de falla al desplazamiento vertical (Okada, 1985); el cuaderno la combina en las cuatro esquinas (notación de Chinnery)."""
         R = np.sqrt(xi**2 + eta**2 + q**2); Xq = np.sqrt(xi**2 + q**2)
         dt = eta * sd - q * cd
         with np.errstate(all='ignore'):
@@ -282,6 +284,7 @@ print('✓ Okada (1985) reproduce los valores de referencia de pyrocko (error m�
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 
 def a_utm(ruta, dx):
+    """Reproyecta el DEM a UTM 17N con celdas de `dx` m (interpolación bilineal). Devuelve la malla (m, NaN sin dato) y su transformación afín."""
     with rasterio.open(ruta) as src:
         tf, w, h = calculate_default_transform(src.crs, CRS_UTM, src.width, src.height, *src.bounds, resolution=dx)
         arr = np.full((h, w), np.nan, 'float32')
@@ -321,6 +324,7 @@ print(f'Malla {nx}×{ny} de {DX:.0f} m | deslizamiento {slip:.1f} m | η₀: má
 '''),
     code('''
 def contorno_falla(esc, L=None, W=None):
+    """Contorno del plano de falla proyectado en superficie, en km UTM 17N, como polígono cerrado de cinco vértices a partir del epicentro y del escenario `esc`."""
     ex, ey = TR.transform(*EPI)
     st = np.radians(esc['strike']); up = np.radians(esc['strike'] + 270.)
     sh = esc['W'] * np.cos(np.radians(esc['dip']))
@@ -445,6 +449,7 @@ se compara solo el primer arribo (umbral de 0,1 m), no la amplitud.
 obs = pd.read_csv(datos('observaciones_1979.csv'))
 
 def elegir_celda(H, tf, dx, lon, lat, hmin=10., rmax=10e3):
+    """Celda de mar más cercana a (`lon`, `lat`) con profundidad de al menos `hmin` m y a no más de `rmax` m. Devuelve (índice, distancia en km, profundidad, estado); el índice es None si cae fuera del dominio o no hay mar cercano."""
     ny, nx = H.shape; x, y = TR.transform(lon, lat)
     ri, ci = (y - tf.f) / tf.e - .5, (x - tf.c) / tf.a - .5
     if not (0 <= ri < ny and 0 <= ci < nx):
@@ -455,6 +460,7 @@ def elegir_celda(H, tf, dx, lon, lat, hmin=10., rmax=10e3):
     return tuple(int(v) for v in w[k]), d[k] / 1e3, H[tuple(w[k])], 'ok'
 
 def tabla_estaciones(H, tf, dx):
+    """Asigna a cada observación de 1979 su celda de mar. Los mareógrafos (tiempo de primera ola positiva) usan un umbral de 5 m y 3 km; los demás, 10 m y 10 km."""
     filas = []
     for _, r in obs.iterrows():
         mareografo = r.t_obs_tipo == 'primera_ola_positiva'
@@ -489,6 +495,7 @@ fuente. Es un análisis de un parámetro a la vez, no una cuantificación de la 
 """),
     code('''
 def correr(dx, dt, esc):
+    """Corre el modelo LSWE con paso espacial `dx` (m), paso de tiempo `dt` (s) y escenario `esc`, durante 110 min. Devuelve, por estación, la elevación máxima (m) y el primer instante en que supera 0,1 m (min)."""
     Hh, tff = cargar_H(dx); e0, _ = eta_inicial(tff, Hh.shape, esc); e0 = np.where(Hh > 0, e0, 0.0)
     ee = tabla_estaciones(Hh, tff, dx); oo = ee[ee.estado == 'ok']
     rr = run_lswe(Hh, dx, e0, dt, 6600., 600., estaciones=[(int(a), int(b)) for a, b in zip(oo.fila, oo.col)])
@@ -582,6 +589,7 @@ la profundidad equivalente es $H_{eq}=(d/t)^2/g$. Una ruta que cruza plataforma 
 """),
     code('''
 def dist_km(lat1, lon1, lat2, lon2):
+    """Distancia en km entre dos puntos (grados) por la fórmula de haversine, con radio terrestre de 6 371 km."""
     p1, p2 = np.radians(lat1), np.radians(lat2)
     a = np.sin((p2 - p1) / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(np.radians(lon2 - lon1) / 2) ** 2
     return 2 * 6371.0 * np.arcsin(np.sqrt(a))
@@ -603,8 +611,10 @@ qc[['estacion', 'dist_km', 'runup_herd_m', 'runup_noaa_m', 't_obs_min', 't_obs_t
     md("## 2. Elevación máxima de la ola"),
     code('''
 def fondo(ax):
+    """Dibuja el fondo del mapa: tierra en gris claro y mar en gris más oscuro."""
     ax.imshow(np.where(H > 0, 0.97, 0.86), cmap='gray', vmin=0, vmax=1, extent=ext)
 def costa(ax):
+    """Dibuja la línea de costa (contorno de profundidad 0,5 m)."""
     ax.contour(np.linspace(ext[0], ext[1], nx), np.linspace(ext[3], ext[2], ny), H, levels=[0.5], colors='k', linewidths=.5)
 
 fig, axs = plt.subplots(1, 2, figsize=(15, 7.5))
@@ -639,6 +649,7 @@ Dos tiempos simulados por estación, leídos en la celda de mar descrita en el c
     code('''
 ok = est[est.estado == 'ok'].reset_index(drop=True)
 def primer(s, signo):
+    """Primer instante (min) en que la serie `s` supera +0,1 m (`signo` > 0) o baja de −0,1 m (`signo` < 0); NaN si nunca ocurre."""
     m = (s > 0.1) if signo > 0 else (s < -0.1)
     return tt[np.argmax(m)] / 60 if m.any() else np.nan
 sim = []
@@ -762,6 +773,7 @@ ax.set_xlim(ext[0] + 5, ext[1] - 5); ax.set_ylim(ext[2] + 5, ext[3] - 5)
 titulo = ax.set_title('')
 
 def cuadro(k):
+    """Actualiza el cuadro `k` de la animación: la elevación del agua (m) donde supera 0,1 m en mar de al menos 10 m de profundidad. Devuelve los artistas modificados."""
     e = snaps[k].astype('float32'); agua.set_array(np.where((np.abs(e) > 0.1) & (H >= 10), e, np.nan))
     titulo.set_text(f't = {snap_t[k]/60:.0f} min — Tsunami de Tumaco 1979 (LSWE)')
     return [agua, titulo]

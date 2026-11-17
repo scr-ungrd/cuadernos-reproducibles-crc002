@@ -24,7 +24,7 @@ Simula la propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) en el Pa
 ## Ejecutar
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment.yml   # Python 3.10 y versiones exactas, verificado el 2026-11-17
 conda activate tsunami-tumaco
 jupyter lab notebooks/
 ```
@@ -33,7 +33,7 @@ Los cuadernos se ejecutan en orden. El cuaderno 2 necesita el DEM del cuaderno 1
 
 ## Licencia
 
-Código bajo licencia MIT; texto y figuras bajo CC BY 4.0. Los datos de `data/` conservan las condiciones de su origen; la licencia del mosaico de NOAA/NCEI y de las observaciones está por confirmar (véase `metadata/sources.csv`).
+Código bajo licencia MIT ([`LICENSE`](LICENSE)); texto y figuras bajo CC BY 4.0 ([`LICENSE-CC-BY-4.0`](LICENSE-CC-BY-4.0)). Los datos de `data/` conservan las condiciones de su origen: el recorte del DEM de NOAA/NCEI es de dominio público en EE. UU. y NCEI aplica CC0 a nivel internacional, y las observaciones de 1979 son hechos citados de Herd et al. (1981) y NOAA/NGDC con su procedencia (véanse `metadata/sources.csv` y `DATA_STATEMENT.md`).
 
 ## Cita y DOI
 

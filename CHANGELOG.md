@@ -1,5 +1,14 @@
 # Cambios
 
+## Sin publicar
+
+**Cambiado**
+
+- `environment.yml` con versiones exactas y Python 3.10, verificado con una ejecución completa en un entorno limpio (150 s). Se quitaron `xarray`, `netcdf4`, `gdal`, `scipy` y `ipywidgets`, que los cuadernos no usan, y se añadieron `pandas` y `pillow`, que sí usan.
+- Las 24 funciones de los cuadernos tienen *docstring* (12 antes).
+- `LICENSE-CC-BY-4.0` para el texto y las figuras; el README y el catálogo de datos ya no dicen «por confirmar» en las licencias del DEM y de Herd et al.
+- RDLS: el archivo de observaciones describe las 12 filas, la licencia y la procedencia, y incluye `data/noaa_runups_1979.csv`.
+
 ## 2.2.0 (2026-11-17)
 
 **Cambiado**

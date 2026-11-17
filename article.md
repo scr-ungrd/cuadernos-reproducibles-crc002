@@ -255,7 +255,7 @@ la inundación, no sobre la elevación en el mar.
 3. **Cuaderno 3** (`03-visualization.ipynb`): mapas, series, control de calidad, comparación y animación. 1–2 min.
 
 :::{note}
-Los tres cuadernos funcionan en la CPU estándar de Colab y no necesitan TPU ni GPU. Si se abren en Colab, el cuaderno 2 requiere el DEM del cuaderno 1 o la copia de `data/`.
+El 2026-11-17 los tres cuadernos corrieron completos en un entorno limpio creado desde `environment.yml` (Python 3.10, versiones exactas) en 150 s en un Apple M1, sin GPU y sin errores; los resultados coinciden con los publicados. Los tres cuadernos funcionan en la CPU estándar de Colab y no necesitan TPU ni GPU. Si se abren en Colab, el cuaderno 2 requiere el DEM del cuaderno 1 o la copia de `data/`.
 :::
 
 ## Limitaciones y trabajo futuro

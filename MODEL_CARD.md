@@ -43,7 +43,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 ## 6. Reproducibilidad
 
-- Entorno: `environment.yml` (conda-forge). Corre en CPU estándar de Colab; unos 45 s para 60 min simulados en la malla de 450 m.
+- Entorno: `environment.yml`, con versiones exactas y Python 3.10. Verificado el 2026-11-17 en un clon limpio del repositorio con un entorno nuevo: los tres cuadernos corrieron sin errores en 150 s en un Apple M1 de 8 núcleos (CPU, sin GPU), y los resultados coinciden con los publicados; la simulación de 110 min en la malla de 450 m toma unos 45 s. No se probó en Colab.
 - El cálculo es determinista y no usa semillas ni aleatoriedad.
 - Los tres cuadernos se regeneran con `scripts/construir_cuadernos.py`; `metadata/descargas.csv` guarda las sumas SHA-256 de los datos.
 - No hay un registro de experimentos ni pruebas automáticas fuera de las de verificación del cuaderno 2.
