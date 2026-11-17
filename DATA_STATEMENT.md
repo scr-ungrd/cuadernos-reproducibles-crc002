@@ -29,7 +29,7 @@ Ninguno.
 ## Disponibilidad de código
 
 - Repositorio: <https://github.com/scr-ungrd/cuadernos-reproducibles-crc002>. Licencia MIT. Los tres cuadernos se generan con `scripts/construir_cuadernos.py`.
-- Versión: 2.2.2 (2026-11-17); la 2.2.1 (DOI [`10.5281/zenodo.24324157`](https://doi.org/10.5281/zenodo.24324157)) tiene el CSV de observaciones mal formado y no debe usarse; la 2.2.0 tiene el DOI [`10.5281/zenodo.24322478`](https://doi.org/10.5281/zenodo.24322478). DOI de todas las versiones [`10.5281/zenodo.24322477`](https://doi.org/10.5281/zenodo.24322477).
+- Versión: 2.2.2 (2026-11-17), DOI [`10.5281/zenodo.24324555`](https://doi.org/10.5281/zenodo.24324555); la 2.2.1 (DOI [`10.5281/zenodo.24324157`](https://doi.org/10.5281/zenodo.24324157)) tiene el CSV de observaciones mal formado y no debe usarse; la 2.2.0 tiene el DOI [`10.5281/zenodo.24322478`](https://doi.org/10.5281/zenodo.24322478). DOI de todas las versiones [`10.5281/zenodo.24322477`](https://doi.org/10.5281/zenodo.24322477).
 - Ficha del modelo: [`MODEL_CARD.md`](MODEL_CARD.md), conforme al Estándar de modelos.
 - Software: [`environment.yml`](environment.yml).
 

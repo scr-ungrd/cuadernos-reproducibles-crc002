@@ -37,7 +37,7 @@ Código bajo licencia MIT ([`LICENSE`](LICENSE)); texto y figuras bajo CC BY 4.0
 
 ## Cita y DOI
 
-Los metadatos de cita están en [`CITATION.cff`](CITATION.cff). El DOI de todas las versiones es [10.5281/zenodo.24322477](https://doi.org/10.5281/zenodo.24322477); la versión 2.2.0 tiene el DOI [10.5281/zenodo.24322478](https://doi.org/10.5281/zenodo.24322478).
+Los metadatos de cita están en [`CITATION.cff`](CITATION.cff). El DOI de todas las versiones es [10.5281/zenodo.24322477](https://doi.org/10.5281/zenodo.24322477); la versión actual (2.2.2) tiene el DOI [10.5281/zenodo.24324555](https://doi.org/10.5281/zenodo.24324555). La 2.2.1 (10.5281/zenodo.24324157) tiene un CSV mal formado y no debe usarse.
 
 ## Uso de inteligencia artificial
 

@@ -280,7 +280,7 @@ explícito lo que falta para pasar de un escenario de propagación a un análisi
 - **Observaciones históricas:** `data/observaciones_1979.csv` (12 lugares, con la procedencia de cada valor: Herd et al., 1981 y NOAA/NGDC, que no coinciden) y los registros de NOAA/NGDC consultados el 2026-11-16 en `data/noaa_runups_1979.csv` (doi:10.7289/V5PN93H7).
 - **Metadatos:** las fuentes y sus condiciones están en `metadata/sources.csv`, el catálogo y el diccionario de datos en `metadata/`, las sumas de verificación en `metadata/descargas.csv` y los metadatos RDLS de las observaciones en `metadata/rdls/`. La declaración completa está en `DATA_STATEMENT.md`.
 - **Licencias:** código bajo MIT; texto y figuras bajo CC BY 4.0. La licencia del mosaico de NOAA/NCEI y de las observaciones está por confirmar.
-- **DOI:** [10.5281/zenodo.24322478](https://doi.org/10.5281/zenodo.24322478) (versión 2.2.0); el DOI de todas las versiones es [10.5281/zenodo.24322477](https://doi.org/10.5281/zenodo.24322477).
+- **DOI:** [10.5281/zenodo.24324555](https://doi.org/10.5281/zenodo.24324555) (versión 2.2.2); el DOI de todas las versiones es [10.5281/zenodo.24322477](https://doi.org/10.5281/zenodo.24322477).
 
 ## Declaración de uso de inteligencia artificial
 
