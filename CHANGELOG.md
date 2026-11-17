@@ -1,6 +1,15 @@
 # Cambios
 
+## 2.2.2 (2026-11-17)
+
+**Corregido**
+
+- `data/observaciones_1979.csv` de la 2.2.1 tenía una coma sin comillas en la nota de Guapi y no se podía leer (los cuadernos fallaban). Se pusieron comillas.
+- Se añadió `scripts/probar_datos.py` (estructura, duplicados, rangos y valores esperados), que el despliegue ejecuta antes de los cuadernos.
+
 ## 2.2.1 (2026-11-17)
+
+**Atención:** esta versión (DOI 10.5281/zenodo.24324157) tiene el CSV de observaciones mal formado; usar la 2.2.2.
 
 **Corregido**
 
