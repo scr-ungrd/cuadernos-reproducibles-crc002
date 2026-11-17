@@ -40,6 +40,10 @@ Ninguno.
 - Limitaciones: sección «Limitaciones y trabajo futuro» del artículo. El escenario sísmico usa parámetros supuestos y las observaciones de 1979 se contradicen entre fuentes (Herd et al. y NOAA/NGDC).
 - El cuaderno es un ejercicio sin validar por una persona experta; no debe usarse para tomar decisiones.
 
+## Actualización
+
+Los datos son una versión final: describen un evento de 1979 y no se prevén actualizaciones, salvo correcciones (cada una genera una versión nueva con su DOI).
+
 ## Compromiso de preservación
 
 - Responsable: Subdirección para el Conocimiento del Riesgo, UNGRD (conocimiento@gestiondelriesgo.gov.co).
