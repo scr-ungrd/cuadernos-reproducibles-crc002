@@ -5,7 +5,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 1. Propósito y uso previsto
 
 - **Modelo:** propagación de un tsunami con las ecuaciones de aguas someras lineales (LSWE) en malla escalonada, con una fuente de dislocación elástica de Okada (1985). Es un modelo físico, no de aprendizaje automático.
-- **Versión:** 2.2.0 (2026-11-17; DOI 10.5281/zenodo.24322478). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
+- **Versión:** 2.2.1 (2026-11-17; DOI de todas las versiones 10.5281/zenodo.24322477). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
 - **Uso previsto:** estimar el tiempo de arribo y comparar escenarios de la propagación del tsunami del 12 de diciembre de 1979 hacia Tumaco, con fines educativos y de método. Por qué un modelo físico: el evento tiene pocas observaciones y no permite entrenar un modelo estadístico.
 - **Usos no previstos:** mapas de amenaza o de inundación (las LSWE no calculan inundación en tierra), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
 - **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 110 minutos de simulación.
@@ -43,7 +43,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 ## 6. Reproducibilidad
 
-- Entorno: `environment.yml`, con versiones exactas y Python 3.10. Verificado el 2026-11-17 en un clon limpio del repositorio con un entorno nuevo: los tres cuadernos corrieron sin errores en 150 s en un Apple M1 de 8 núcleos (CPU, sin GPU), y los resultados coinciden con los publicados; la simulación de 110 min en la malla de 450 m toma unos 45 s. No se probó en Colab.
+- Entorno: `environment.yml`, con versiones exactas y Python 3.10. Verificado el 2026-11-17 en un clon limpio del repositorio con un entorno nuevo: los tres cuadernos corrieron sin errores en 150 s en un Apple M1 de 8 núcleos (CPU, sin GPU), y los resultados coinciden con los publicados; la simulación de 110 min en la malla de 450 m toma unos 45 s. Binder: el 2026-11-17 la imagen se construyó desde `environment.yml` y arrancó sin errores (no se ejecutaron los cuadernos dentro de Binder). No se probó en Colab.
 - El cálculo es determinista y no usa semillas ni aleatoriedad.
 - Los tres cuadernos se regeneran con `scripts/construir_cuadernos.py`; `metadata/descargas.csv` guarda las sumas SHA-256 de los datos.
 - No hay un registro de experimentos ni pruebas automáticas fuera de las de verificación del cuaderno 2.

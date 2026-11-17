@@ -1,8 +1,16 @@
 # Cambios
 
-## Sin publicar
+## 2.2.1 (2026-11-17)
+
+**Corregido**
+
+- `data/observaciones_1979.csv`: el hundimiento de Guapi según Herd et al. (1981) es de 25 a 30 cm (figura 1, p. 442), no de 40 a 45 cm (que es el de Bozán). Se contrastaron 13 valores con el artículo; ver `metadata/validacion_herd.md`. No cambia ningún resultado.
 
 **Cambiado**
+
+- `metadata/sources.csv`: Herd et al. (1981) y la base de run-ups de NOAA/NGDC son dos insumos con su fila, URL y licencia; los run-ups se citan con su DOI (10.7289/V5PN93H7) en `references.bib` y el artículo.
+- El RDLS archivado en la v2.2.0 traía el `id` antiguo; esta versión lleva el actual.
+- Binder: la imagen se construyó desde el `environment.yml` con versiones exactas y arrancó sin errores el 2026-11-17.
 
 - `environment.yml` con versiones exactas y Python 3.10, verificado con una ejecución completa en un entorno limpio (150 s). Se quitaron `xarray`, `netcdf4`, `gdal`, `scipy` y `ipywidgets`, que los cuadernos no usan, y se añadieron `pandas` y `pillow`, que sí usan.
 - Las 24 funciones de los cuadernos tienen *docstring* (12 antes).

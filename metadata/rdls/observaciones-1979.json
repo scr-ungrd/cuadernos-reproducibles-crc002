@@ -99,9 +99,10 @@
       },
       {
         "id": "noaa-ngdc-tsunamis",
-        "name": "Base de run-ups de tsunamis de NOAA/NGDC",
+        "name": "NCEI/WDS Global Historical Tsunami Database (run-ups)",
         "type": "dataset",
-        "url": "https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/runups"
+        "url": "https://doi.org/10.7289/V5PN93H7",
+        "citation": "NOAA National Centers for Environmental Information. Global Historical Tsunami Database [Conjunto de datos]. NOAA NCEI. https://doi.org/10.7289/V5PN93H7"
       }
     ]
   }
