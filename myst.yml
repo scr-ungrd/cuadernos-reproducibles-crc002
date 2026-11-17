@@ -43,6 +43,7 @@ project:
   resources:
     - data/README.md
     - data/observaciones_1979.csv
+    - data/noaa_runups_1979.csv
     - data/dem_tumaco_noaa_15s.tif
   downloads:
     - id: article-pdf

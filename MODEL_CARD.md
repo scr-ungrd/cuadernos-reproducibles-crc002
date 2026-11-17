@@ -14,7 +14,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 2. Datos del modelo
 
 - **Batimetría:** mosaico global de DEM de NOAA/NCEI recortado (`data/dem_tumaco_noaa_15s.tif`). Su licencia y la de los modelos que lo componen están por confirmar (`metadata/sources.csv`).
-- **Observaciones (solo contraste):** `data/observaciones_1979.csv`, 8 estaciones heredadas de la versión 1. **Contrastadas el 2026-11-16 con la base de NOAA/NGDC y no coinciden** (ver `data/README.md`). No se usan para entrenar ni calibrar: el modelo no tiene parámetros calibrados.
+- **Observaciones (solo contraste):** `data/observaciones_1979.csv`, 12 lugares con la procedencia de cada valor (Herd et al., 1981 y NOAA/NGDC, que **no coinciden** entre sí; ver `data/README.md`). No se usan para entrenar ni calibrar: el modelo no tiene parámetros calibrados.
 - **Hoja de datos:** `data/README.md` y `metadata/` (fuentes, catálogo, diccionario, RDLS).
 - **Sin datos personales** ni de comunidades. Los datos son una batimetría y observaciones de run-up.
 
@@ -30,10 +30,10 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 4. Validación y desempeño
 
 - **Verificación numérica:** deformación de Okada contra `pyrocko` (diferencia menor que 1e-5 m en tres geometrías), onda plana contra la solución exacta, estado de reposo exacto y fuente ligada al epicentro (prueba automática).
-- **Comparación con observaciones:** cuatro estaciones comparables, sin verificar. Arribos simulados entre −7 y +8 min de los observados; η simulada de 1,2 a 2,0 veces el run-up observado. **No se calcula RMSE ni R²** por la pequeña cantidad y la calidad de los datos.
-- **Contraste con la literatura:** 23 min de arribo a Tumaco frente a 22 min de TUNAMI-N2 (Ávila-Guzmán et al., 2026). Las amplitudes son unas cuatro veces las de Escobar et al. (2020).
+- **Comparación con observaciones:** siete estaciones comparables. Hay dos tiempos documentados: en Buenaventura la primera ola positiva (99 min) **no aparece en el modelo** (η máx. −0,01 m en la celda de 5 m), y en Esmeraldas el retroceso coincide en signo, no en tiempo. La razón η simulada / run-up va de 0,12 a 5,7 según la estación y la fuente (Tumaco: 5,7 veces el valor de Herd y 1,5 el de NOAA/NGDC). **No se calcula RMSE ni R²**: las fuentes se contradicen.
+- **Contraste con la literatura:** 22 min de primer ascenso en Tumaco frente a 22 min de TUNAMI-N2 (Ávila-Guzmán et al., 2026). La amplitud en la celda de Tumaco (4,6 m) es unas dos veces la de Escobar et al. (2020).
 - **No es una validación independiente.** Línea base simple y *back-testing*: no se hicieron. La revisión por una persona experta del dominio no se ha hecho.
-- **Casos de fallo conocidos:** sobreestima amplitudes; no calcula inundación; el arribo en Bocagrande llega antes de lo observado.
+- **Casos de fallo conocidos:** sobreestima la amplitud en Tumaco y la subestima en San Juan de la Costa, Isla Gorgona y Guapi; no calcula inundación; no reproduce la primera ola positiva observada en Buenaventura.
 
 ## 5. Incertidumbre y sensibilidad
 

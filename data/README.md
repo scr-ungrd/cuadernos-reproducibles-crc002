@@ -14,46 +14,30 @@ descarga de GEBCO que usaba responde 404 y el servicio entregaba el mosaico de N
 
 Valores de control: elevación −5 183 a 5 615 m; el punto del epicentro está a −834 m y Tumaco a unos 4 m.
 
-## Observaciones históricas: `observaciones_1979.csv`
+## Observaciones históricas: `observaciones_1979.csv` y `noaa_runups_1979.csv`
 
-Ocho estaciones con run-up y tiempo de arribo del tsunami del 12 de diciembre de 1979.
+Doce lugares con run-up o tiempo observado del tsunami del 12 de diciembre de 1979, **con la procedencia de cada valor**. Se reconstruyó el 2026-11-17 a partir de Herd et al. (1981, *Science* 211, 441–445; p. 442–443) y de la base de run-ups de NOAA/NGDC (`https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/runups`, consultada el 2026-11-16; los registros del 12-12-1979 están en `noaa_runups_1979.csv`). Las columnas están en `metadata/DATA_DICTIONARY.md`.
 
-| Campo | Descripción | Unidades |
-|-------|-------------|---------|
-| `estacion` | Nombre del lugar de observación | — |
-| `lat` | Latitud | °N |
-| `lon` | Longitud | °E (negativo al oeste) |
-| `runup_m` | Run-up observado | m |
-| `tiempo_arr_min` | Tiempo de arribo después del sismo | min |
-| `fuente` | Referencia declarada en la tabla (Herd et al., 1981; base de tsunamis de NOAA/NGDC) | — |
+**Las dos fuentes no coinciden** donde ambas dan run-up, y por eso no se promedian:
 
-> **Estado: contrastado con la base de NOAA/NGDC y no coincide (ver la tabla siguiente); no verificado contra Herd et al. (1981).** Los valores se heredaron de la versión 1. Las coordenadas de varias estaciones son aproximadas: **San Juan** y **El Charco** caen tierra adentro, **Buenaventura** en un estuario somero y **Salinas**
-> queda fuera del dominio; en el cuaderno 3 se excluyen y se declara. El arribo de Salinas (35 min a unos 460 km) exige una profundidad equivalente de unos 4 900 m a lo
-> largo de toda la ruta y es físicamente sospechoso. Las cifras de run-up (3–5 m en Tumaco) tampoco coinciden con las alturas máximas de 1,9–2,3 m que Escobar et al. (2020)
-> simulan para la isla de Tumaco.
+| Lugar | Herd et al. (1981) | NOAA/NGDC (registro) |
+|---|---|---|
+| Tumaco | 0,8 m sobre la posición previa de la marea alta (rango de marea de 1,3 m); el mareógrafo quedó destruido | 3 m (9742) |
+| San Juan de la Costa | casi 2,5 m sobre la marea alta previa; de 3 a 4 olas | 6 m (9745) |
+| Buenaventura | primera ola positiva en el mareógrafo a la 1 h 39 min; sin altura | 0,14 m (9743); llegada a la 1 h 40 min |
+| Esmeraldas | retroceso del mar a los 5 a 6 min; sin run-up | sin run-up (9752) |
+| El Charco, Iscuandé | los reportes de inundación fueron falsos | 2 m cada uno (9749, 9748) |
 
-### Contraste con la base de NOAA/NGDC (2026-11-16)
+El CSV de la versión 1 daba 5,0 y 4,5 m en Tumaco «según Herd», 0,8 m en Buenaventura, 4,0 m y 12 min en Esmeraldas, y tres lugares (Bocagrande, Salinas y una ubicación de «San Juan» tierra adentro) que ninguna fuente respalda. Esos valores se retiraron en la versión 2.2.
 
-Se consultó la base de run-ups de NOAA/NGDC (`https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/runups`, país COLOMBIA y ECUADOR, 12 de diciembre de 1979). **Las cifras de `observaciones_1979.csv` no coinciden con las de la base**:
-
-| Estación del CSV | Run-up del CSV (m) | Registro de NOAA/NGDC | Run-up de NOAA (m) |
-|---|---|---|---|
-| Tumaco (muelle) y (playa) | 5,0 y 4,5 | TUMACO (1,833 N; 78,733 O) | 3 |
-| Bocagrande | 3,0 | sin registro | — |
-| San Juan | 2,5 | SAN JUAN DE LA COSTA (2,333 N; 78,6 O) | 6 |
-| El Charco | 1,5 | EL CHARCO (2,708 N; 77,664 O) | 2 |
-| Esmeraldas (Ecuador) | 4,0 | ESMERALDAS | sin run-up |
-| Buenaventura | 0,8 | BUENAVENTURA | 0,14 (arribo a las 9:39, 1 h 40 min) |
-| Salinas (Ecuador) | 1,2 | sin registro | — |
-
-La base añade registros que el CSV no tiene (Guapi 2 m, Iscuandé 2 m, Isla Gorgona 5 m, Limones 2 m, Vuelta Larga 3 m, El Barro 1 m, Timbiquí 1 m). Los tiempos de arribo de la base casi no existen para estos puntos. Por eso el CSV debe tratarse como no verificado y sustituirse por la base o por Herd et al. (1981) antes de usarlo para validar.
+Limitaciones: se desconoce la referencia vertical de los registros de NOAA/NGDC y el informe en el que se basan; las coordenadas son las de NOAA/NGDC y varios puntos caen en estuarios o tierra adentro (se excluyen del cuaderno 3 y se declara); solo hay dos tiempos observados (Buenaventura y Esmeraldas) y son de tipos distintos.
 
 ## Escenario sísmico usado en la versión 2
 
 | Parámetro | Valor | Estado |
 |-----------|-------|--------|
 | Mw | 8,3 | Yoshimoto et al. (2017), citado por Escobar et al. (2020) y Ávila-Guzmán et al. (2026) |
-| Epicentro | 1,598° N, 79,359° O | Según Herd et al. (1981) (por verificar) |
+| Epicentro | 1,584° N, 79,386° O | Herd et al. (1981), tabla 1 (hipocentro preliminar del NEIS) |
 | Profundidad del hipocentro | 33 km | Según el artículo de la versión 1 (por verificar) |
 | Longitud × ancho de la falla | 200 × 80 km | **Supuesto** |
 | Rumbo / buzamiento / ángulo de desplazamiento | 30° / 15° / 90° | **Supuesto** |

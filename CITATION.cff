@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "Si usa este cuaderno, cítelo con los metadatos de este archivo."
 type: software
 title: "Simulación del Tsunami de Tumaco de 1979 con Google Colab"
-version: "2.1.0"
-date-released: "2026-11-16"
+version: "2.2.0"
+date-released: "2026-11-17"
 authors:
   - name: "Subdirección para el Conocimiento del Riesgo, Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD)"
 repository-code: "https://github.com/scr-ungrd/cuadernos-reproducibles-crc002"

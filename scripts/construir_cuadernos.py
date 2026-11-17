@@ -24,7 +24,7 @@ TEXTO_ADVERTENCIA = """
 :::{danger} Ejercicio sin validar: no usar para tomar decisiones
 Este cuaderno **no ha sido validado por una persona experta** en modelación de tsunamis. Es un ejercicio de reproducibilidad y de aprendizaje. Sus resultados **no deben usarse para tomar decisiones** de gestión del riesgo, ordenamiento territorial, diseño de obras, planes de evacuación ni alertas.
 
-Falta, como mínimo: la revisión por una persona experta; la distribución de deslizamiento real del evento (la geometría de la falla es un supuesto); la verificación de las observaciones de 1979 contra las fuentes primarias; y un modelo no lineal con cálculo de inundación.
+Falta, como mínimo: la revisión por una persona experta; la distribución de deslizamiento real del evento (la geometría de la falla es un supuesto); la validación contra observaciones de 1979 que se contradicen entre fuentes (véase el cuaderno 3); y un modelo no lineal con cálculo de inundación.
 :::
 """
 
@@ -73,8 +73,8 @@ def datos(nombre):
     (destino / nombre).write_bytes(r.content)
     return destino / nombre
 
-# Epicentro del 12-dic-1979 (1,598° N, 79,359° O, según el artículo; por verificar con la fuente primaria)
-EPI = (-79.359, 1.598)                       # (lon, lat)
+# Epicentro del 12-dic-1979 (1,584° N, 79,386° O: tabla 1 de Herd et al., 1981, hipocentro del NEIS)
+EPI = (-79.386, 1.584)                       # (lon, lat)
 CRS_UTM = CRS.from_epsg(32617)               # UTM 17N, meridiano central 81° O (error de escala < 0,2 % en el dominio)
 TR = Transformer.from_crs(4326, 32617, always_xy=True)
 G = 9.81
@@ -99,7 +99,7 @@ nb1 = [
 [![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)]({COLAB}01-bathymetry.ipynb)
 
 Prepara el modelo digital de elevación (DEM) del dominio de simulación del tsunami de Tumaco de 1979:
-**0,2° S–4,2° N y 81,2°–76,9° O** (unos 480 × 480 km), que cubre Tumaco, Bocagrande, Esmeraldas (Ecuador) y Buenaventura
+**0,2° S–4,2° N y 81,2°–76,9° O** (unos 480 × 480 km), que cubre Tumaco, Esmeraldas (Ecuador) y Buenaventura
 y deja la fuente sísmica lejos de los bordes. **Runtime:** CPU, menos de 1 minuto.
 
 **Fuente de los datos.** El DEM sale del servicio de mosaico global de NOAA/NCEI
@@ -214,7 +214,7 @@ versión 1:
 | Fronteras | Reflejantes (Neumann) | Abiertas (radiación) |
 | Dominio | 0,5–3,5° N, 79,5–77° O | 0,2° S–4,2° N, 81,2–76,9° O |
 
-**Runtime:** CPU, unos 2 minutos. **Se ejecuta el cuaderno 1 antes** (o se descarga el DEM automáticamente).
+**Runtime:** CPU, unos 4 minutos. **Se ejecuta el cuaderno 1 antes** (o se descarga el DEM automáticamente).
 """),
     code(COMUN),
     md("""
@@ -228,7 +228,7 @@ cuyos parámetros geométricos son **supuestos, por verificar**:
 | Parámetro | Valor | Estado |
 |---|---|---|
 | Mw | 8,3 | Literatura (Yoshimoto et al., 2017) |
-| Epicentro | 1,598° N, 79,359° O | Según el artículo; por verificar |
+| Epicentro | 1,584° N, 79,386° O | Herd et al. (1981), tabla 1 |
 | Longitud × ancho | 200 × 80 km | Supuesto (orden de magnitud para Mw 8,3) |
 | Rumbo / buzamiento / ángulo de desplazamiento | 30° / 15° / 90° (inverso) | Supuesto (margen colombo-ecuatoriano con rumbo NNE) |
 | Profundidad del borde superior | 12 km (el borde inferior queda a ~33 km) | Supuesto; el hipocentro de 33 km se ubica en el centro del borde inferior |
@@ -240,7 +240,7 @@ ni componente horizontal sobre el talud).
 """),
     code('''
 ESC = dict(Mw=8.3, strike=30., dip=15., rake=90., L=200e3, W=80e3, top_depth=12e3, mu=3e10, nu=0.25)
-DX, DT, T_END, OUT_EVERY = 450., 1.0, 3600., 120.   # m, s, s, s (61 min simulados, 31 instantáneas)
+DX, DT, T_END, OUT_EVERY = 450., 1.0, 6600., 240.   # m, s, s, s (110 min simulados, 28 instantáneas; Buenaventura recibe la primera ola a los 99 min)
 
 def okada_uz(x, y, d, L, W, strike_deg, dip_deg, rake_deg, slip, nu=0.25):
     """Desplazamiento vertical en superficie (m, positivo hacia arriba) de una falla rectangular en un semiespacio elástico
@@ -437,7 +437,9 @@ print('✓ Reposo exacto; ✓ onda plana')
 
 Cada estación de la tabla de observaciones se lleva a la **celda de mar más cercana con profundidad de al menos 10 m y a menos de 10 km**. Con 450 m de
 resolución y sin inundación, una celda en la línea de costa (profundidades de 0 a pocos metros) no es una lectura representativa. Las estaciones cuya
-coordenada cae tierra adentro, en un estuario somero o fuera del dominio se **excluyen y se declara**.
+coordenada cae tierra adentro, en un estuario somero o fuera del dominio se **excluyen y se declara**. Excepción: la estación con una primera ola positiva medida en un
+mareógrafo (Buenaventura) usa la celda más cercana de **al menos 5 m** y a menos de 3 km, porque con 10 m el punto quedaría a 15 km y el tiempo de viaje cambiaría en decenas de minutos;
+se compara solo el primer arribo (umbral de 0,1 m), no la amplitud.
 """),
     code('''
 obs = pd.read_csv(datos('observaciones_1979.csv'))
@@ -455,7 +457,8 @@ def elegir_celda(H, tf, dx, lon, lat, hmin=10., rmax=10e3):
 def tabla_estaciones(H, tf, dx):
     filas = []
     for _, r in obs.iterrows():
-        ij, d, h, est = elegir_celda(H, tf, dx, r.lon, r.lat)
+        mareografo = r.t_obs_tipo == 'primera_ola_positiva'
+        ij, d, h, est = elegir_celda(H, tf, dx, r.lon, r.lat, hmin=5. if mareografo else 10., rmax=3e3 if mareografo else 10e3)
         filas.append(dict(estacion=r.estacion, fila=-1 if ij is None else ij[0], col=-1 if ij is None else ij[1],
                           dist_celda_km=d, H_celda_m=h, estado=est))
     return pd.DataFrame(filas)
@@ -463,7 +466,7 @@ def tabla_estaciones(H, tf, dx):
 est = tabla_estaciones(H, tf, DX)
 est
 '''),
-    md("## 5. Simulación (450 m, 60 min)"),
+    md("## 5. Simulación (450 m, 110 min)"),
     code('''
 import time
 ok = est[est.estado == 'ok']
@@ -488,7 +491,7 @@ fuente. Es un análisis de un parámetro a la vez, no una cuantificación de la 
 def correr(dx, dt, esc):
     Hh, tff = cargar_H(dx); e0, _ = eta_inicial(tff, Hh.shape, esc); e0 = np.where(Hh > 0, e0, 0.0)
     ee = tabla_estaciones(Hh, tff, dx); oo = ee[ee.estado == 'ok']
-    rr = run_lswe(Hh, dx, e0, dt, 3600., 600., estaciones=[(int(a), int(b)) for a, b in zip(oo.fila, oo.col)])
+    rr = run_lswe(Hh, dx, e0, dt, 6600., 600., estaciones=[(int(a), int(b)) for a, b in zip(oo.fila, oo.col)])
     tt = np.arange(rr['rec'].shape[0]) * dt
     sal = {}
     for k, nombre in enumerate(oo.estacion):
@@ -537,9 +540,11 @@ nb3 = [
 Mapas, series de tiempo, control de calidad de las observaciones, comparación con 1979 y animación. **Requiere los resultados del cuaderno 2**
 (`output/resultados.npz`). **Runtime:** CPU, 1–2 minutos.
 
-**Qué es y qué no es la comparación.** Las ocho observaciones de la tabla `data/observaciones_1979.csv` están **sin verificar contra las fuentes primarias**, y
-varias coordenadas son aproximadas (dos quedan tierra adentro). El modelo es lineal y sin inundación, de modo que su η en el mar **no es un run-up**.
-Se muestran las diferencias para ubicar el orden de magnitud y los límites del modelo, no para validarlo.
+**Qué es y qué no es la comparación.** Las observaciones de `data/observaciones_1979.csv` se reconstruyeron en la versión 2.2 con su procedencia: cada valor
+dice si viene de Herd et al. (1981) o de la base de run-ups de NOAA/NGDC, y **las dos fuentes no coinciden** (Tumaco: 0,8 m frente a 3 m; San Juan de la Costa: 2,5 m frente a 6 m).
+Por eso no se compara contra un número sino contra el **rango** entre fuentes. El modelo es lineal y sin inundación, de modo que su η en el mar **no es un run-up**.
+Solo hay dos tiempos de arribo documentados (Buenaventura y Esmeraldas), así que la comparación de tiempos es mínima. Se muestran diferencias para ubicar el orden de
+magnitud y los límites del modelo, no para validarlo.
 """),
     code(COMUN),
     code('''
@@ -567,10 +572,13 @@ print(f'✓ El máximo de η inicial ({eta_ini.max():.1f} m) está a {d_max:.0f}
     md("""
 ## 1. Control de calidad de las observaciones
 
-Antes de comparar, se revisa que las observaciones sean físicamente coherentes con una onda larga $c=\\sqrt{gH}$: con la distancia de círculo máximo $d$ al
-epicentro y el arribo $t$, la profundidad equivalente es $H_{eq}=(d/t)^2/g$. En el océano frente a Colombia las profundidades son de 3 000–4 000 m
-(hasta ~5 000 m en el dominio); una profundidad equivalente mayor sobre una ruta que cruza plataforma y talud indica un dato sospechoso. Es el mismo control del
-cuaderno 318 del libro *Teoría y métodos de análisis de riesgos*.
+Cada valor del CSV trae su procedencia: `runup_herd_m` (Herd et al., 1981, p. 442: altura **sobre la posición previa de la marea alta**) y `runup_noaa_m`
+(base de run-ups de NOAA/NGDC, registro `id_noaa`; no se conoce la referencia vertical de cada registro). **No se promedian ni se mezclan**: donde hay dos valores se
+trabaja con el rango. Solo dos estaciones tienen tiempo de arribo (`t_obs_min`) y su tipo difiere: **Buenaventura** es la primera ola *positiva* en el mareógrafo y
+**Esmeraldas** es el inicio del *retroceso* del mar.
+
+Para la primera ola positiva se revisa la coherencia con una onda larga $c=\\sqrt{gH}$: con la distancia de círculo máximo $d$ al epicentro y el arribo $t$,
+la profundidad equivalente es $H_{eq}=(d/t)^2/g$. Una ruta que cruza plataforma y talud da un valor medio bajo; un valor mayor que la profundidad del océano (~4 000 m) sería sospechoso.
 """),
     code('''
 def dist_km(lat1, lon1, lat2, lon2):
@@ -579,14 +587,18 @@ def dist_km(lat1, lon1, lat2, lon2):
     return 2 * 6371.0 * np.arcsin(np.sqrt(a))
 
 qc = obs.copy()
+qc['runup_min_m'] = qc[['runup_herd_m', 'runup_noaa_m']].min(axis=1)
+qc['runup_max_m'] = qc[['runup_herd_m', 'runup_noaa_m']].max(axis=1)
 qc['dist_km'] = dist_km(EPI[1], EPI[0], qc.lat, qc.lon).round(0)
-qc['v_media_ms'] = (qc.dist_km * 1e3 / (qc.tiempo_arr_min * 60)).round(0)
-qc['H_equiv_m'] = (qc.v_media_ms ** 2 / G).round(-1)
+primera = qc.t_obs_tipo == 'primera_ola_positiva'
+qc['H_equiv_m'] = np.where(primera, ((qc.dist_km * 1e3 / (qc.t_obs_min * 60)) ** 2 / G).round(-1), np.nan)
+qc['sospechoso'] = np.where(qc.H_equiv_m > 4000, 'H equiv. > 4 000 m', '')
 qc = qc.merge(est[['estacion', 'estado']], on='estacion')
 dominio = (qc.lon.between(-81.2, -76.9)) & (qc.lat.between(-0.2, 4.2))
 qc.loc[~dominio, 'estado'] = 'fuera del dominio'
-qc['sospechoso'] = np.where(qc.H_equiv_m > 4000, 'H equiv. > 4 000 m', '')
-qc[['estacion', 'dist_km', 'runup_m', 'tiempo_arr_min', 'v_media_ms', 'H_equiv_m', 'sospechoso', 'estado', 'fuente']]
+conflicto = (qc.runup_herd_m.notna() & qc.runup_noaa_m.notna())
+print(f'Estaciones con las dos fuentes: {int(conflicto.sum())}; en todas difieren por un factor de {(qc.runup_max_m / qc.runup_min_m)[conflicto].min():.1f} a {(qc.runup_max_m / qc.runup_min_m)[conflicto].max():.1f}')
+qc[['estacion', 'dist_km', 'runup_herd_m', 'runup_noaa_m', 't_obs_min', 't_obs_tipo', 'H_equiv_m', 'sospechoso', 'estado']]
 '''),
     md("## 2. Elevación máxima de la ola"),
     code('''
@@ -599,9 +611,9 @@ fig, axs = plt.subplots(1, 2, figsize=(15, 7.5))
 ax = axs[0]; fondo(ax)
 ax.contour(np.linspace(ext[0], ext[1], nx), np.linspace(ext[3], ext[2], ny), H, levels=[200, 1000, 3000], colors='#8c99a6', linewidths=.4)
 im = ax.imshow(np.where(H >= 10, np.maximum(maxeta, 0), np.nan), cmap='YlOrRd', vmin=0, vmax=5, extent=ext, alpha=.9)
-costa(ax); plt.colorbar(im, ax=ax, shrink=.75, label='η máxima en 60 min, profundidad ≥ 10 m (m)')
+costa(ax); plt.colorbar(im, ax=ax, shrink=.75, label='η máxima en 110 min, profundidad ≥ 10 m (m)')
 ax.plot(ex / 1e3, ey / 1e3, '*', c='red', mec='k', ms=18, label='Epicentro 1979'); ax.legend(loc='upper left'); ejes_lonlat(ax)
-ax.set_title('Elevación máxima de la superficie del mar (LSWE, 0–60 min)')
+ax.set_title('Elevación máxima de la superficie del mar (LSWE, 0–110 min)')
 
 ax = axs[1]; fondo(ax)
 zona = (H >= 10) & (H < 200)
@@ -621,52 +633,81 @@ print(f'(en celdas de < 10 m el modelo lineal llega a {maxeta[H>0].max():.0f} m:
     md("""
 ## 3. Series de tiempo y arribos
 
-El arribo simulado es el **primer instante con η > 0,1 m** (primer ascenso del nivel; en Tumaco la deformación inicial es un descenso y el primer ascenso es la llegada de la ola). La lectura se toma en la celda de mar descrita en el cuaderno 2.
+Dos tiempos simulados por estación, leídos en la celda de mar descrita en el cuaderno 2: el **primer ascenso** (primer instante con η > 0,1 m) y el **primer descenso**
+(primer instante con η < −0,1 m). El primero se compara con la primera ola positiva de Buenaventura; el segundo, con el inicio del retroceso en Esmeraldas.
 """),
     code('''
 ok = est[est.estado == 'ok'].reset_index(drop=True)
+def primer(s, signo):
+    m = (s > 0.1) if signo > 0 else (s < -0.1)
+    return tt[np.argmax(m)] / 60 if m.any() else np.nan
 sim = []
 for k, r in ok.iterrows():
-    s = rec[:, k]; ta = tt[np.argmax(s > 0.1)] / 60 if (s > 0.1).any() else np.nan
-    sim.append(dict(estacion=r.estacion, H_celda_m=r.H_celda_m, eta_max_m=s.max(), eta_min_m=s.min(),
-                    t_arribo_sim_min=ta, t_cresta_min=tt[np.argmax(s)] / 60))
-sim = pd.DataFrame(sim).merge(obs[['estacion', 'runup_m', 'tiempo_arr_min']], on='estacion')
-sim['razon_amplitud'] = (sim.eta_max_m / sim.runup_m).round(2)
-sim['dif_arribo_min'] = (sim.t_arribo_sim_min - sim.tiempo_arr_min).round(1)
-
-fig, axs = plt.subplots(2, 2, figsize=(14, 7.5), sharex=True)
-for ax, (_, r), k in zip(axs.flat, sim.iterrows(), range(len(sim))):
     s = rec[:, k]
-    ax.plot(tt / 60, s, c='#0154a5', lw=1.6)
-    ax.axhline(0, c='k', lw=.4)
-    ax.axvline(r.tiempo_arr_min, c='#c0392b', ls='--', lw=1.2, label=f'Arribo observado ({r.tiempo_arr_min:.0f} min)*')
-    ax.axvline(r.t_arribo_sim_min, c='#0154a5', ls=':', lw=1.2, label=f'Arribo simulado ({r.t_arribo_sim_min:.0f} min)')
-    ax.axhline(r.runup_m, c='#c0392b', ls='-.', lw=.8, alpha=.6, label=f'Run-up observado ({r.runup_m} m)*')
-    ax.set_title(f'{r.estacion} (celda de {r.H_celda_m:.0f} m de profundidad)', fontsize=10); ax.set_ylabel('η (m)'); ax.legend(fontsize=7, loc='upper left'); ax.grid(alpha=.3)
-for ax in axs[1]: ax.set_xlabel('Tiempo desde el sismo (min)')
-fig.text(.01, .005, '* Observaciones de data/observaciones_1979.csv, sin verificar contra la fuente primaria.', fontsize=8)
+    sim.append(dict(estacion=r.estacion, H_celda_m=r.H_celda_m, eta_max_m=s.max(), eta_min_m=s.min(),
+                    t_ascenso_sim_min=primer(s, +1), t_descenso_sim_min=primer(s, -1), t_cresta_min=tt[np.argmax(s)] / 60))
+sim = pd.DataFrame(sim).merge(qc[['estacion', 'runup_herd_m', 'runup_noaa_m', 'runup_min_m', 'runup_max_m', 't_obs_min', 't_obs_tipo']], on='estacion')
+# El retroceso de Esmeraldas no se compara en tiempo: la fuente es instantánea y η ya es negativo en t = 0
+sim['t_comparable_sim_min'] = np.where(sim.t_obs_tipo == 'primera_ola_positiva', sim.t_ascenso_sim_min, np.nan)
+sim['dif_t_min'] = (sim.t_comparable_sim_min - sim.t_obs_min).round(1)
+# La razón solo tiene sentido donde el modelo produce una ola (η máx. > 0,1 m, el umbral de arribo)
+hay_ola = sim.eta_max_m > 0.1
+sim['razon_vs_min'] = np.where(hay_ola, sim.eta_max_m / sim.runup_min_m, np.nan).round(2)
+sim['razon_vs_max'] = np.where(hay_ola, sim.eta_max_m / sim.runup_max_m, np.nan).round(2)
+
+n = len(sim); nc = 2; nr = int(np.ceil(n / nc))
+fig, axs = plt.subplots(nr, nc, figsize=(14, 3.6 * nr), sharex=True, squeeze=False)
+for k, (ax, (_, r)) in enumerate(zip(axs.flat, sim.iterrows())):
+    ax.plot(tt / 60, rec[:, k], c='#0154a5', lw=1.5); ax.axhline(0, c='k', lw=.4)
+    if isinstance(r.t_obs_tipo, str):
+        etiqueta = 'primera ola positiva' if r.t_obs_tipo == 'primera_ola_positiva' else 'inicio del retroceso'
+        ax.axvline(r.t_obs_min, c='#c0392b', ls='--', lw=1.2, label=f'Observado: {etiqueta} ({r.t_obs_min:.0f} min)')
+    if pd.notna(r.runup_min_m):
+        ax.axhspan(r.runup_min_m, r.runup_max_m, color='#c0392b', alpha=.18, label=('Run-up observado (' + (f'{r.runup_min_m:g} m' if r.runup_min_m == r.runup_max_m else f'{r.runup_min_m:g}–{r.runup_max_m:g} m, entre fuentes') + ')'))
+    ax.set_title(f'{r.estacion} (celda de {r.H_celda_m:.0f} m de profundidad)', fontsize=10); ax.set_ylabel('η (m)'); ax.grid(alpha=.3)
+    if ax.get_legend_handles_labels()[0]: ax.legend(fontsize=7, loc='upper left')
+for ax in axs.flat[n:]: ax.axis('off')
+for ax in axs[-1]: ax.set_xlabel('Tiempo desde el sismo (min)')
+fig.text(.01, .005, 'Bandas y líneas rojas: observaciones de data/observaciones_1979.csv (Herd et al., 1981 y NOAA/NGDC, que no coinciden).', fontsize=8)
 plt.tight_layout(); plt.savefig(WORK / 'time_series.png', dpi=130, bbox_inches='tight'); plt.show()
 sim.round(2)
 '''),
     md("## 4. Comparación indicativa con las observaciones"),
     code('''
-fig, axs = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(14, 5.2), gridspec_kw={'width_ratios': [1, 1.7]})
 ax = axs[0]
-ax.plot([0, 40], [0, 40], 'k--', lw=1, label='1:1')
-ax.scatter(sim.tiempo_arr_min, sim.t_arribo_sim_min, s=70, c='#0154a5', zorder=3)
-for _, r in sim.iterrows(): ax.annotate(r.estacion, (r.tiempo_arr_min, r.t_arribo_sim_min), textcoords='offset points', xytext=(5, 4), fontsize=8)
-ax.set(xlim=(5, 30), ylim=(5, 30), xlabel='Arribo observado* (min)', ylabel='Arribo simulado (min)', title='Tiempos de arribo'); ax.legend(); ax.grid(alpha=.3)
-ax = axs[1]; xp = np.arange(len(sim)); w = .38
-ax.bar(xp - w / 2, sim.runup_m, w, label='Run-up observado*', color='#c0392b', alpha=.85)
-ax.bar(xp + w / 2, sim.eta_max_m, w, label='η máxima simulada (mar, sin inundación)', color='#0154a5', alpha=.85)
+tobs = sim[sim.t_obs_tipo == 'primera_ola_positiva'].reset_index(drop=True)
+xp = np.arange(len(tobs)); w = .38
+ax.bar(xp - w / 2, tobs.t_obs_min, w, color='#c0392b', alpha=.85, label='Observado')
+ax.bar(xp + w / 2, tobs.t_comparable_sim_min, w, color='#0154a5', alpha=.85, label='Simulado')
+ax.set_xticks(xp); ax.set_xticklabels([f'{r.estacion}\\n({"1.ª ola positiva" if r.t_obs_tipo == "primera_ola_positiva" else "inicio del retroceso"})' for _, r in tobs.iterrows()], fontsize=8)
+for k_, r_ in tobs.iterrows():
+    if np.isnan(r_.t_comparable_sim_min):
+        ax.annotate('modelo: sin ola > 0,1 m\\nen 110 min', (k_ + w / 2, 2), ha='center', fontsize=8, color='#0154a5')
+ax.set_ylabel('Minutos desde el sismo'); ax.set_title('Tiempo de la primera ola positiva (una estación)'); ax.legend(); ax.grid(axis='y', alpha=.3)
+
+ax = axs[1]; xp = np.arange(len(sim)); w = .27
+ax.bar(xp - w, sim.runup_herd_m, w, label='Run-up Herd et al. (1981)', color='#e67e22', alpha=.9)
+ax.bar(xp, sim.runup_noaa_m, w, label='Run-up NOAA/NGDC', color='#c0392b', alpha=.85)
+ax.bar(xp + w, sim.eta_max_m, w, label='η máxima simulada (mar, sin inundación)', color='#0154a5', alpha=.85)
 ax.set_xticks(xp); ax.set_xticklabels(sim.estacion, rotation=20, ha='right', fontsize=8); ax.set_ylabel('m'); ax.legend(fontsize=8); ax.grid(axis='y', alpha=.3)
 ax.set_title('Amplitudes (no son magnitudes equivalentes)')
 plt.tight_layout(); plt.savefig(WORK / 'validation.png', dpi=130, bbox_inches='tight'); plt.show()
 
 print(f'Estaciones comparables: {len(sim)} de {len(obs)}')
 print('Excluidas:'); print(qc[qc.estado != 'ok'][['estacion', 'estado']].to_string(index=False))
-print(f'\\nArribo: diferencia simulado − observado entre {sim.dif_arribo_min.min():+.0f} y {sim.dif_arribo_min.max():+.0f} min')
-print(f'Amplitud: η simulada / run-up observado entre {sim.razon_amplitud.min():.1f} y {sim.razon_amplitud.max():.1f}')
+print()
+for _, r in tobs.iterrows():
+    if np.isnan(r.t_comparable_sim_min):
+        print(f'Tiempo en {r.estacion}: observado {r.t_obs_min:.0f} min; el modelo no produce un ascenso > 0,1 m en {tt[-1]/60:.0f} min (η máx. = {r.eta_max_m:.2f} m en la celda de {r.H_celda_m:.0f} m)')
+    else:
+        print(f'Tiempo en {r.estacion}: simulado {r.t_comparable_sim_min:.0f} min, observado {r.t_obs_min:.0f} min ({r.dif_t_min:+.0f} min)')
+esm = sim[sim.t_obs_tipo == 'retroceso']
+for _, r in esm.iterrows():
+    print(f'{r.estacion}: η < −0,1 m desde t = 0 (condición inicial) y primer ascenso a los {r.t_ascenso_sim_min:.0f} min; observado: retroceso del mar a los 5–6 min. '
+          'Coincide el signo del primer movimiento; el tiempo no es comparable (la fuente es instantánea).')
+cmp_ = sim.dropna(subset=['runup_min_m'])
+print(f'η simulada / run-up: entre {cmp_.razon_vs_max.min():.2f} y {cmp_.razon_vs_min.max():.2f} (η sobre el menor y sobre el mayor valor de cada estación)')
 '''),
     md("""
 ### Contraste con resultados publicados
@@ -675,13 +716,14 @@ Dos trabajos de la literatura simularon el escenario de 1979 en Tumaco con **mod
 de deslizamiento de Poveda y Pulido (2019). Se citan aquí **como referencia de orden de magnitud**; su fuente, su malla y sus definiciones difieren de las de este cuaderno.
 """),
     code('''
-tum = sim.estacion.str.startswith("Tumaco")
+tum = sim.estacion == "Tumaco"
 pub = pd.DataFrame([
     ['Altura máxima del tsunami, isla de Tumaco, escenario 1979 (modelo de déficit de deslizamiento)', '2,30 m', 'Escobar et al. (2020), tabla 3'],
     ['Altura máxima del tsunami, isla de Tumaco, escenario 1979 (modelo de banda ancha)', '1,88 m', 'Escobar et al. (2020), tabla 3'],
     ['Llegada de la primera ola a Tumaco', '22 min', 'Ávila-Guzmán et al. (2026)'],
+    ['Run-up observado en Tumaco: Herd et al. (1981) / NOAA/NGDC', '0,8 m / 3 m', 'Herd et al. (1981), p. 442; registro NOAA 9742'],
     ['Este cuaderno: η máxima en celdas de mar de 10-25 m, Tumaco', f'{sim.eta_max_m[tum].min():.1f}-{sim.eta_max_m[tum].max():.1f} m', 'LSWE lineal, 450 m'],
-    ['Este cuaderno: primer ascenso > 0,1 m en Tumaco', f'{sim.t_arribo_sim_min[tum].min():.0f}-{sim.t_arribo_sim_min[tum].max():.0f} min', 'LSWE lineal, 450 m']],
+    ['Este cuaderno: primer ascenso > 0,1 m en Tumaco', f'{sim.t_ascenso_sim_min[tum].min():.0f} min', 'LSWE lineal, 450 m']],
     columns=['Magnitud', 'Valor', 'Fuente'])
 pub
 '''),
@@ -741,8 +783,10 @@ print(f'  Modelo:              LSWE, malla escalonada, {dx:.0f} m, dt = {dt:.0f}
 print(f'  Fuente:              Okada (1985), Mw {8.3}, deslizamiento uniforme {float(R["slip"]):.1f} m (geometría supuesta)')
 print(f'  η máx. (≥ 10 m prof.): {maxeta[H>=10].max():.2f} m | plataforma 10–200 m: {maxeta[zona].max():.2f} m')
 print(f'  Estaciones:          {len(sim)} comparables de {len(obs)} (resto excluido, ver sección 4)')
-print(f'  Arribo sim − obs:    {sim.dif_arribo_min.min():+.0f} a {sim.dif_arribo_min.max():+.0f} min (obs. sin verificar)')
-print(f'  η sim / run-up obs:  {sim.razon_amplitud.min():.1f} a {sim.razon_amplitud.max():.1f}')
+for _, r in tobs.iterrows():
+    print(f'  Tiempo {r.estacion}:'.ljust(23) + ('el modelo no produce una ola > 0,1 m' if np.isnan(r.t_comparable_sim_min) else f'sim − obs = {r.dif_t_min:+.0f} min') + f' (observado: primera ola positiva a los {r.t_obs_min:.0f} min)')
+print('  Esmeraldas:          el signo del primer movimiento (descenso) coincide con Herd; el tiempo no es comparable')
+print(f'  η sim / run-up obs:  {cmp_.razon_vs_max.min():.2f} a {cmp_.razon_vs_min.max():.2f} (Herd y NOAA no coinciden entre sí)')
 for f in ['max_eta_map.png', 'time_series.png', 'validation.png', 'tsunami_propagation.gif', 'fuente_okada.png']:
     p = WORK / f; print(f'  {"✓" if p.exists() else "✗"} {f}')
 '''),

@@ -4,18 +4,37 @@ Describe los archivos de `data/`. La descripción de su origen y de su estado de
 
 ## `observaciones_1979.csv`
 
-Ocho estaciones con run-up y tiempo de arribo del tsunami del 12 de diciembre de 1979. **No están verificadas contra las fuentes primarias.**
+Doce lugares con run-up o tiempo observado del tsunami del 12 de diciembre de 1979, con la procedencia de cada valor. **Herd et al. (1981) y la base de NOAA/NGDC no coinciden** donde ambos dan run-up (Tumaco: 0,8 frente a 3 m; San Juan de la Costa: 2,5 frente a 6 m); los valores no se promedian. Las coordenadas son las del registro de NOAA/NGDC.
 
 | Columna | Descripción | Tipo | Unidad |
 |---|---|---|---|
 | `estacion` | Nombre del lugar de observación | texto | |
-| `lat` | Latitud (aproximada en varias estaciones) | decimal | grados norte |
+| `lat` | Latitud (la del registro de NOAA/NGDC) | decimal | grados norte |
 | `lon` | Longitud (negativa al oeste) | decimal | grados este |
-| `runup_m` | Run-up observado | decimal | m |
-| `tiempo_arr_min` | Tiempo de arribo después del sismo | entero | min |
-| `fuente` | Referencia declarada en la tabla: Herd et al. 1981 o NOAA NGDC | texto | |
+| `runup_herd_m` | Altura de la ola sobre la posición previa de la marea alta, según Herd et al. (1981), p. 442 | decimal | m |
+| `runup_noaa_m` | Run-up del registro de NOAA/NGDC (`id_noaa`); se desconoce su referencia vertical | decimal | m |
+| `t_obs_min` | Tiempo observado después del sismo (7:59:04 UTC) | decimal | min |
+| `t_obs_tipo` | Qué es `t_obs_min`: `primera_ola_positiva` (mareógrafo de Buenaventura) o `retroceso` (inicio del retroceso del mar, Esmeraldas) | texto | |
+| `id_noaa` | Identificador del registro en la base de run-ups de NOAA/NGDC | entero | |
+| `notas` | Texto de apoyo con la cita de Herd et al. (1981) | texto | |
 
-No hay valores faltantes. Cuatro estaciones son comparables con la simulación (Tumaco muelle, Tumaco playa, Bocagrande y Esmeraldas); las demás se excluyen y se declara en el cuaderno 3.
+Hay valores faltantes por diseño: cada fuente cubre solo algunos lugares. Siete lugares son comparables con la simulación; los demás se excluyen y se declara en el cuaderno 3.
+
+## `noaa_runups_1979.csv`
+
+Registros de la base de run-ups de NOAA/NGDC para el 12 de diciembre de 1979 en Colombia y Ecuador, tal como los devolvió la API el 2026-11-16 (se omite un registro duplicado sin altura de Isla Gorgona, id 11154).
+
+| Columna | Descripción | Tipo | Unidad |
+|---|---|---|---|
+| `id_noaa` | Identificador del registro | entero | |
+| `lugar` | Nombre del lugar en la base | texto | |
+| `pais` | País | texto | |
+| `lat`, `lon` | Coordenadas del registro | decimal | grados |
+| `runup_m` | Run-up registrado (vacío si no hay) | decimal | m |
+| `dist_fuente_km` | Distancia a la fuente que calcula NOAA | decimal | km |
+| `tipo_medicion` | Código de tipo de medición de NOAA (no se interpretó) | entero | |
+| `primer_movimiento` | Código de primer movimiento de NOAA (no se interpretó) | texto | |
+| `dudoso` | Marca de dato dudoso de NOAA (`n` = no) | texto | |
 
 ## `dem_tumaco_noaa_15s.tif`
 

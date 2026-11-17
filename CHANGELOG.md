@@ -1,5 +1,25 @@
 # Cambios
 
+## 2.2.0 (2026-11-17)
+
+**Cambiado**
+
+- `data/observaciones_1979.csv` se reconstruyó: 12 lugares con la procedencia de cada valor (`runup_herd_m`, `runup_noaa_m`, `t_obs_min`, `t_obs_tipo`, `id_noaa`). Se eliminaron Bocagrande y Salinas (ninguna fuente los respalda), el run-up de Esmeraldas y la hora de llegada de Tumaco (el mareógrafo quedó destruido). Se corrigieron las atribuciones a Herd et al. (1981): en Tumaco la ola más alta fue de 0,8 m y no de 5,0 y 4,5 m, y la llegada a Buenaventura fue a 1 h 39 min y no a 45 min.
+- Epicentro: 1,584° N, 79,386° O (tabla 1 de Herd et al., 1981) en lugar de 1,598° N, 79,359° O.
+- Simulación de 110 min (antes 60) para alcanzar la primera ola positiva observada en Buenaventura (99 min); 28 cuadros en la animación.
+- Cuaderno 3: la comparación usa el rango entre Herd et al. y NOAA/NGDC; los tiempos se comparan solo donde hay un tiempo del mismo tipo. Resultado: el modelo no reproduce la primera ola de Buenaventura; la razón η simulada / run-up va de 0,12 a 5,7 según la estación y la fuente.
+- Artículo, `DATA_STATEMENT.md`, `MODEL_CARD.md`, diccionario, catálogo, `sources.csv` y RDLS actualizados con lo anterior.
+- Licencia del DEM de NOAA/NCEI registrada según la política abierta de NCEI (CC0 para uso internacional); las condiciones de los modelos que lo componen no se verificaron.
+
+**Agregado**
+
+- `data/noaa_runups_1979.csv`: registros de NOAA/NGDC consultados el 2026-11-16.
+
+**Pendiente**
+
+- Informes detrás de los registros de NOAA (referencia vertical, tipo de medición), el informe de Pararas-Carayannis (1980) y registros mareográficos para reducir el rango entre fuentes.
+- DOI de Zenodo, prueba CARE y licencia de los valores de Herd et al.
+
 ## 2.1.0 (2026-11-16)
 
 **Agregado**
