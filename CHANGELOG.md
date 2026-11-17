@@ -38,8 +38,7 @@
 
 **Pendiente**
 
-- Actualizar `DATA_STATEMENT.md`, el README y el RDLS con el DOI de la versión archivada en Zenodo.
-- Confirmar la licencia del mosaico de NOAA/NCEI y de las observaciones, aplicar la prueba CARE y archivar un *release* en Zenodo.
+- Ninguno de los pendientes de DOI: la versión 2.2.0 está archivada en Zenodo (`10.5281/zenodo.24322478`).
 
 ## 2.0.0 (2026-11-02)
 
