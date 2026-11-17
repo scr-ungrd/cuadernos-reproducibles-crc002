@@ -35,9 +35,9 @@ project:
   banner: ./images/banner.png
   subject: "Climate & disaster risk assessment"
   venue:
-    title: "Riesgos · UNGRD Cuadernos Reproducibles"
-    short_title: "Riesgos UNGRD"
-    url: https://scr-ungrd.github.io/riesgos
+    title: "Cuadernos Reproducibles de Conocimiento del Riesgo · UNGRD"
+    short_title: "Cuadernos reproducibles"
+    url: https://scr-ungrd.github.io/cuadernos-reproducibles/
   requirements:
     - environment.yml
   resources:
@@ -73,11 +73,14 @@ site:
   options:
     logo_text: "Riesgos · UNGRD"
   nav:
-    - title: "Inicio del proyecto"
-      url: https://scr-ungrd.github.io/riesgos
+    - title: "← Cuadernos reproducibles"
+      url: https://scr-ungrd.github.io/cuadernos-reproducibles/
     - title: "Repositorio"
       url: https://github.com/scr-ungrd/cuadernos-reproducibles-crc002
   actions:
+    - title: "Cuadernos reproducibles"
+      url: https://scr-ungrd.github.io/cuadernos-reproducibles/
+      static: true
     - title: "Abrir en Colab"
       url: https://colab.research.google.com/github/scr-ungrd/cuadernos-reproducibles-crc002/blob/main/notebooks/03-visualization.ipynb
       static: false
