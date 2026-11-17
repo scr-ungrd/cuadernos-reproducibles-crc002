@@ -71,16 +71,14 @@ project:
 site:
   title: Tsunami Tumaco 1979 — Simulación Reproducible
   options:
-    logo_text: "Riesgos · UNGRD"
+    logo_text: "Cuadernos · UNGRD"
+    style: ./css/home.css
   nav:
     - title: "← Cuadernos reproducibles"
       url: https://scr-ungrd.github.io/cuadernos-reproducibles/
     - title: "Repositorio"
       url: https://github.com/scr-ungrd/cuadernos-reproducibles-crc002
   actions:
-    - title: "Cuadernos reproducibles"
-      url: https://scr-ungrd.github.io/cuadernos-reproducibles/
-      static: true
     - title: "Abrir en Colab"
       url: https://colab.research.google.com/github/scr-ungrd/cuadernos-reproducibles-crc002/blob/main/notebooks/03-visualization.ipynb
       static: false
