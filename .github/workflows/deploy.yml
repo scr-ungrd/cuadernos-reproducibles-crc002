@@ -39,6 +39,9 @@ jobs:
       - name: Install mystmd
         run: npm install -g mystmd
 
+      - name: Pruebas de los datos
+        run: python scripts/probar_datos.py
+
       - name: Execute notebook 1 — batimetría
         working-directory: notebooks
         run: |

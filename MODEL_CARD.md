@@ -5,7 +5,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 1. Propósito y uso previsto
 
 - **Modelo:** propagación de un tsunami con las ecuaciones de aguas someras lineales (LSWE) en malla escalonada, con una fuente de dislocación elástica de Okada (1985). Es un modelo físico, no de aprendizaje automático.
-- **Versión:** 2.2.1 (2026-11-17; DOI de todas las versiones 10.5281/zenodo.24322477). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
+- **Versión:** 2.2.2 (2026-11-17; DOI de todas las versiones 10.5281/zenodo.24322477). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
 - **Uso previsto:** estimar el tiempo de arribo y comparar escenarios de la propagación del tsunami del 12 de diciembre de 1979 hacia Tumaco, con fines educativos y de método. Por qué un modelo físico: el evento tiene pocas observaciones y no permite entrenar un modelo estadístico.
 - **Usos no previstos:** mapas de amenaza o de inundación (las LSWE no calculan inundación en tierra), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
 - **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 110 minutos de simulación.
