@@ -6,7 +6,7 @@ Cuaderno CRC002: simulación del tsunami de Tumaco de 1979 con Google Colab. Con
 
 Las dos fuentes, con su dirección exacta, versión o consulta y restricciones, están en [`metadata/sources.csv`](metadata/sources.csv). Ambas se obtienen sin credenciales y sin pago.
 
-- **Mosaico global de DEM de NOAA/NCEI** (`DEM_mosaics/DEM_global_mosaic`): se pidió el 2026-11-02 y una copia del recorte se versiona en `data/dem_tumaco_noaa_15s.tif`. Es un mosaico de modelos de distinta resolución y procedencia. **Su licencia y la de los modelos que lo componen están por confirmar.**
+- **Mosaico global de DEM de NOAA/NCEI** (`DEM_mosaics/DEM_global_mosaic`): se pidió el 2026-11-02 y una copia del recorte se versiona en `data/dem_tumaco_noaa_15s.tif`. Es un mosaico de modelos de distinta resolución y procedencia. Es de dominio público en EE. UU. y NCEI aplica CC0 a nivel internacional; **las condiciones de cada modelo que lo compone no se verificaron.**
 - **Observaciones del tsunami de 1979** (Herd et al., 1981, `10.1126/science.211.4481.441`; base de tsunamis de NOAA/NGDC): 12 lugares en `data/observaciones_1979.csv`, reconstruidos en la versión 2.2 con la procedencia de cada valor (ver `metadata/DATA_DICTIONARY.md`), y los registros de NOAA/NGDC en `data/noaa_runups_1979.csv`. **Las dos fuentes no coinciden** (Tumaco: 0,8 m según Herd et al., 3 m según NOAA/NGDC) y no se promedian. La política abierta de NOAA/NCEI aplica CC0; los valores de Herd et al. son hechos citados con su referencia, y la licencia de la publicación original no se evaluó.
 
 ## Datos derivados publicados
@@ -15,7 +15,7 @@ Los archivos de `data/` están descritos en [`metadata/data_catalog.csv`](metada
 
 La batimetría es un insumo de modelación y no un conjunto de datos de riesgo, por lo que no tiene archivo RDLS. Los resultados de los cuadernos (`notebooks/output/`) no se versionan.
 
-Hasta que se confirmen las licencias de las fuentes, los datos de `data/` conservan las condiciones de su origen y no se les asigna una licencia propia.
+Licencias: los datos de `data/` se publican como dominio público/CC0 1.0 (insumos de NOAA/NCEI y hechos citados de Herd et al., 1981; ver la revisión de licencias más abajo), con la obligación ética de citar las fuentes. El código es MIT (`LICENSE`) y el texto y las figuras, CC BY 4.0 (`LICENSE-CC-BY-4.0`); cada uno declara su licencia por separado.
 
 ## Datos con acceso restringido
 

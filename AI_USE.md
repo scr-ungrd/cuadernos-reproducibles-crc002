@@ -10,7 +10,7 @@ El desarrollo de este cuaderno contó con la asistencia de un modelo de IA de la
 - **Fechas de uso:** del 2026-11-15 al 2026-11-17 (según el historial).
 - **Para qué se usó:** el historial muestra cambios asistidos en los tres cuadernos, `myst.yml`, la plantilla Typst, el PDF, las imágenes y `CHANGELOG.md`. El 2026-11-16 se aplicaron los estándares de datos, modelos y uso de IA (ficha del modelo, `DATA_STATEMENT.md`, metadatos). El 2026-11-17 se reconstruyeron las observaciones de 1979 con la procedencia de cada valor (Herd et al., 1981 y NOAA/NGDC), se rehízo la comparación del modelo con las observaciones, se añadió el icono de regreso a la portada y se revisaron las licencias. Mauricio Romero Torres dirigió cada cambio.
 - **Revisión humana:** Mauricio Romero Torres (SCR-UNGRD) leyó el código y verificó las cifras y las citas; la revisión es del 2026-11-17.
-- **Datos enviados a la herramienta:** ninguno que no sea público. Los datos del repositorio son públicos y no contienen datos personales.
+- **Datos enviados a la herramienta:** el PDF de Herd et al. (1981), un artículo de *Science* con derechos del editor, que la persona autora aportó para extraer los valores de run-up y los tiempos de arribo (corregido el 2026-11-17; si ese uso es aceptable debe decidirlo una persona). Ningún otro dato enviado era no público. Los datos del repositorio son públicos y no contienen datos personales.
 - **Prompts y salidas:** no se conservan los prompts de las sesiones.
 
 El artículo incluye un aviso de que no ha sido validado por una persona experta y de que no debe usarse para tomar decisiones.

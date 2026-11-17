@@ -5,15 +5,15 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 1. Propósito y uso previsto
 
 - **Modelo:** propagación de un tsunami con las ecuaciones de aguas someras lineales (LSWE) en malla escalonada, con una fuente de dislocación elástica de Okada (1985). Es un modelo físico, no de aprendizaje automático.
-- **Versión:** 2.1.0 (2026-11-16). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
+- **Versión:** 2.2.0 (2026-11-17; DOI 10.5281/zenodo.24322478). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
 - **Uso previsto:** estimar el tiempo de arribo y comparar escenarios de la propagación del tsunami del 12 de diciembre de 1979 hacia Tumaco, con fines educativos y de método. Por qué un modelo físico: el evento tiene pocas observaciones y no permite entrenar un modelo estadístico.
 - **Usos no previstos:** mapas de amenaza o de inundación (las LSWE no calculan inundación en tierra), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
-- **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 60 minutos de simulación.
+- **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 110 minutos de simulación.
 - **Revisión previa a una decisión:** debe revisar el resultado una persona experta en tsunamis de la SCR. La revisión la coordina Mauricio Romero Torres (SCR-UNGRD).
 
 ## 2. Datos del modelo
 
-- **Batimetría:** mosaico global de DEM de NOAA/NCEI recortado (`data/dem_tumaco_noaa_15s.tif`). Su licencia y la de los modelos que lo componen están por confirmar (`metadata/sources.csv`).
+- **Batimetría:** mosaico global de DEM de NOAA/NCEI recortado (`data/dem_tumaco_noaa_15s.tif`). Es de dominio público en EE. UU. y NCEI aplica CC0 a nivel internacional; las condiciones de los modelos que lo componen no se verificaron (`metadata/sources.csv`).
 - **Observaciones (solo contraste):** `data/observaciones_1979.csv`, 12 lugares con la procedencia de cada valor (Herd et al., 1981 y NOAA/NGDC, que **no coinciden** entre sí; ver `data/README.md`). No se usan para entrenar ni calibrar: el modelo no tiene parámetros calibrados.
 - **Hoja de datos:** `data/README.md` y `metadata/` (fuentes, catálogo, diccionario, RDLS).
 - **Sin datos personales** ni de comunidades. Los datos son una batimetría y observaciones de run-up.
@@ -22,7 +22,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 - **Ecuaciones:** LSWE linealizadas, esquema de diferencias finitas en malla escalonada, sin difusión numérica y sin fricción (sección «Esquema numérico» del artículo).
 - **Fuente:** falla rectangular de Okada: Mw 8,3, 200 × 80 km, rumbo 30°, buzamiento 15°, ángulo de desplazamiento 90°, borde superior a 12 km, rigidez 30 GPa, Poisson 0,25, deslizamiento 7,4 m. **La geometría es un supuesto**; la magnitud viene de la literatura.
-- **Numérica:** malla de 1 065 × 1 084 celdas de 450 m (UTM 17N), paso de 1 s (CFL = 0,70), 3 600 s, instantáneas cada 120 s.
+- **Numérica:** malla de 1 065 × 1 084 celdas de 450 m (UTM 17N), paso de 1 s (CFL = 0,70), 6 600 s (110 min), instantáneas cada 240 s.
 - **Parámetros ajustados:** ninguno; no hay hiperparámetros ni selección con datos de prueba.
 - **Modelos o pesos de terceros:** ninguno. Okada se implementó en el repositorio y se verificó contra `pyrocko`.
 - **Formato:** no hay pesos; los resultados se guardan como arreglos de NumPy y GIF.
