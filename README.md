@@ -1,4 +1,4 @@
-# CRC002: simulación del tsunami de Tumaco de 1979 (versión 2)
+# CRC002: simulación del tsunami de Tumaco de 1979 con Google Colab
 
 > **Cuaderno reproducible de conocimiento del riesgo.** Subdirección para el Conocimiento del Riesgo (SCR), Unidad Nacional para la Gestión del Riesgo de Desastres (UNGRD), Colombia.
 > **Ejercicio sin validar por una persona experta: no usar para tomar decisiones.**

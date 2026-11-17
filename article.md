@@ -1,5 +1,5 @@
 ---
-title: Simulación del tsunami de Tumaco de 1979 [Versión 2, validación indicativa]
+title: Simulación del Tsunami de Tumaco de 1979 con Google Colab
 subtitle: Propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) con una fuente de Okada y aguas someras lineales en Google Colab
 ---
 
@@ -265,7 +265,7 @@ Los tres cuadernos funcionan en la CPU estándar de Colab y no necesitan TPU ni 
 2. **Fuente.** Falla única de deslizamiento uniforme con geometría supuesta. Debe reemplazarse por la distribución de deslizamiento de Poveda y Pulido (2019) y verificar el epicentro, la profundidad y el mecanismo contra Herd et al. (1981) y Yoshimoto et al. (2017).
 3. **Generación instantánea y desacoplada**, sin filtro por la columna de agua ni desplazamiento horizontal sobre el talud.
 4. **Resolución.** 450 m no capturan las islas de Tumaco ni el estuario; hacen falta mallas anidadas con batimetría local.
-5. **Observaciones.** Verificar las ocho contra Herd et al. (1981) y la base de la NOAA, corregir las coordenadas y completar con registros mareográficos.
+5. **Observaciones.** El contraste del 2026-11-16 con la base de run-ups de NOAA/NGDC mostró que las cifras de las ocho no coinciden (por ejemplo, 3 m en Tumaco frente a 5,0 y 4,5 m); falta verificarlas contra Herd et al. (1981), corregir las coordenadas y completar con registros mareográficos.
 6. **Probabilista.** Un análisis para el cálculo de la pérdida anual esperada necesita muchas fuentes con sus frecuencias.
 
 ## Conclusiones

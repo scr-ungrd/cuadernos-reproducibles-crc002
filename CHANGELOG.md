@@ -4,12 +4,16 @@
 
 **Agregado**
 
+- `MODEL_CARD.md` (Estándar de modelos).
+- Contraste de `observaciones_1979.csv` con la base de run-ups de NOAA/NGDC (2026-11-16): las cifras no coinciden (`data/README.md`).
+- `DATA_STATEMENT.md`, `MODEL_CARD.md`, el diccionario, `AI_USE.md` y este historial como documentos de apoyo del sitio.
 - Carpeta `metadata/`: `sources.csv`, `data_catalog.csv`, `DATA_DICTIONARY.md`, `descargas.csv` (sumas SHA-256) y el archivo RDLS 1.0.0 de las observaciones.
 - `README.md`, `DATA_STATEMENT.md`, `CITATION.cff`, `AI_USE.md` y `scripts/registrar_descargas.py`.
 - Secciones de disponibilidad de datos y declaración de uso de IA en el artículo.
 
 **Cambiado**
 
+- Título: «Simulación del Tsunami de Tumaco de 1979 con Google Colab».
 - `environment.yml`: se quita el canal `defaults`; todos los paquetes están en `conda-forge`.
 
 **Pendiente**

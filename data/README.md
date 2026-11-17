@@ -27,11 +27,26 @@ Ocho estaciones con run-up y tiempo de arribo del tsunami del 12 de diciembre de
 | `tiempo_arr_min` | Tiempo de arribo después del sismo | min |
 | `fuente` | Referencia declarada en la tabla (Herd et al., 1981; base de tsunamis de NOAA/NGDC) | — |
 
-> **Estado: sin verificar contra las fuentes primarias.** Los valores se heredaron de la versión 1 y no se han contrastado con Herd et al. (1981) ni con la base de
-> NOAA/NGDC. Las coordenadas de varias estaciones son aproximadas: **San Juan** y **El Charco** caen tierra adentro, **Buenaventura** en un estuario somero y **Salinas**
+> **Estado: contrastado con la base de NOAA/NGDC y no coincide (ver la tabla siguiente); no verificado contra Herd et al. (1981).** Los valores se heredaron de la versión 1. Las coordenadas de varias estaciones son aproximadas: **San Juan** y **El Charco** caen tierra adentro, **Buenaventura** en un estuario somero y **Salinas**
 > queda fuera del dominio; en el cuaderno 3 se excluyen y se declara. El arribo de Salinas (35 min a unos 460 km) exige una profundidad equivalente de unos 4 900 m a lo
 > largo de toda la ruta y es físicamente sospechoso. Las cifras de run-up (3–5 m en Tumaco) tampoco coinciden con las alturas máximas de 1,9–2,3 m que Escobar et al. (2020)
 > simulan para la isla de Tumaco.
+
+### Contraste con la base de NOAA/NGDC (2026-11-16)
+
+Se consultó la base de run-ups de NOAA/NGDC (`https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/runups`, país COLOMBIA y ECUADOR, 12 de diciembre de 1979). **Las cifras de `observaciones_1979.csv` no coinciden con las de la base**:
+
+| Estación del CSV | Run-up del CSV (m) | Registro de NOAA/NGDC | Run-up de NOAA (m) |
+|---|---|---|---|
+| Tumaco (muelle) y (playa) | 5,0 y 4,5 | TUMACO (1,833 N; 78,733 O) | 3 |
+| Bocagrande | 3,0 | sin registro | — |
+| San Juan | 2,5 | SAN JUAN DE LA COSTA (2,333 N; 78,6 O) | 6 |
+| El Charco | 1,5 | EL CHARCO (2,708 N; 77,664 O) | 2 |
+| Esmeraldas (Ecuador) | 4,0 | ESMERALDAS | sin run-up |
+| Buenaventura | 0,8 | BUENAVENTURA | 0,14 (arribo a las 9:39, 1 h 40 min) |
+| Salinas (Ecuador) | 1,2 | sin registro | — |
+
+La base añade registros que el CSV no tiene (Guapi 2 m, Iscuandé 2 m, Isla Gorgona 5 m, Limones 2 m, Vuelta Larga 3 m, El Barro 1 m, Timbiquí 1 m). Los tiempos de arribo de la base casi no existen para estos puntos. Por eso el CSV debe tratarse como no verificado y sustituirse por la base o por Herd et al. (1981) antes de usarlo para validar.
 
 ## Escenario sísmico usado en la versión 2
 

@@ -1,13 +1,13 @@
 # Declaración de disponibilidad de datos y de código
 
-Cuaderno CRC002: simulación del tsunami de Tumaco de 1979 (versión 2). Conforme al «Estándar de datos» de la colección de Cuadernos Reproducibles (<https://scr-ungrd.github.io/cuadernos-reproducibles/estandar-de-datos>).
+Cuaderno CRC002: simulación del tsunami de Tumaco de 1979 con Google Colab. Conforme al «Estándar de datos» de la colección de Cuadernos Reproducibles (<https://scr-ungrd.github.io/cuadernos-reproducibles/estandar-de-datos>).
 
 ## Datos de entrada
 
 Las dos fuentes, con su dirección exacta, versión o consulta y restricciones, están en [`metadata/sources.csv`](metadata/sources.csv). Ambas se obtienen sin credenciales y sin pago.
 
 - **Mosaico global de DEM de NOAA/NCEI** (`DEM_mosaics/DEM_global_mosaic`): se pidió el 2026-11-02 y una copia del recorte se versiona en `data/dem_tumaco_noaa_15s.tif`. Es un mosaico de modelos de distinta resolución y procedencia. **Su licencia y la de los modelos que lo componen están por confirmar.**
-- **Observaciones del tsunami de 1979** (Herd et al., 1981, `10.1126/science.211.4481.441`; base de tsunamis de NOAA/NGDC): 8 estaciones en `data/observaciones_1979.csv`. **No están verificadas contra las fuentes primarias**; la licencia está por confirmar.
+- **Observaciones del tsunami de 1979** (Herd et al., 1981, `10.1126/science.211.4481.441`; base de tsunamis de NOAA/NGDC): 8 estaciones en `data/observaciones_1979.csv`. **El contraste del 2026-11-16 con la base de run-ups de NOAA/NGDC muestra que las cifras no coinciden** (tabla en `data/README.md`) y no se han verificado contra Herd et al. (1981); la licencia está por confirmar.
 
 ## Datos derivados publicados
 
@@ -29,7 +29,8 @@ Ninguno.
 ## Disponibilidad de código
 
 - Repositorio: <https://github.com/scr-ungrd/cuadernos-reproducibles-crc002>. Licencia MIT. Los tres cuadernos se generan con `scripts/construir_cuadernos.py`.
-- Versión: 2.0.0 (2026-11-02). Sin DOI: falta archivar un *release* en Zenodo.
+- Versión: 2.1.0 (2026-11-16). Sin DOI: falta archivar un *release* en Zenodo.
+- Ficha del modelo: [`MODEL_CARD.md`](MODEL_CARD.md), conforme al Estándar de modelos.
 - Software: [`environment.yml`](environment.yml).
 
 ## Validación técnica y limitaciones
