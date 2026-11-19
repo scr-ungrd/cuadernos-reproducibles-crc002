@@ -12,7 +12,7 @@
 
 **Cambiado**
 
-- `pillow` 12.3.0 → 13.0.0 en `environment.yml` y en el flujo de despliegue: la versión anterior tenía vulnerabilidades conocidas (`pip-audit`).
+- `pillow` 12.3.0 → 13.0.0 en `environment.yml` y en el flujo de despliegue: la versión anterior tenía vulnerabilidades conocidas (`pip-audit`). Como 13.0.0 exige Python 3.11 o superior, el entorno y el flujo pasan de Python 3.10 a 3.11.
 - `.github/workflows/deploy.yml`: permisos mínimos por trabajo, `mystmd` con versión fija y Typst con suma de verificación SHA-256. `.gitignore` excluye `.env`.
 - Resultado principal (`output/resultados.npz`): ahora son las NSWE; las LSWE van a `output/resultados_lswe.npz`. En la celda de Tumaco η máx. pasa de 4,56 a 3,71 m y el arribo no cambia (21,9 min); en celdas de mar de 10 m o más, de 8,8 a 6,2 m. Las razones η simulada / run-up (artículo) cambian en consecuencia.
 - Tiempo de ejecución del cuaderno 2: unos 11 min (antes unos 4); las NSWE a 450 m toman unos 5,5 min.
