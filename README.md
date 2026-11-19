@@ -20,6 +20,7 @@ Simula la propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) en el Pa
 | `metadata/` | Fuentes (`sources.csv`), catálogo y diccionario de datos, sumas SHA-256 y metadatos RDLS |
 | `scripts/` | `construir_cuadernos.py` y `registrar_descargas.py` |
 | `DATA_STATEMENT.md`, `CITATION.cff`, `CHANGELOG.md`, `AI_USE.md` | Disponibilidad de datos y de código, cita, historial de cambios y uso de IA |
+| `SECURITY.md`, `metadata/escaneo_seguridad.md` | Política de seguridad y registro del escaneo previo al release |
 
 ## Ejecutar
 

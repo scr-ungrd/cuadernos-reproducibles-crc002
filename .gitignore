@@ -20,3 +20,8 @@ notebooks/output/
 notebooks/*.png
 notebooks/*.gif
 *.npz
+
+# Secretos y configuración local (nunca se versionan)
+.env
+.env.*
+!.env.example

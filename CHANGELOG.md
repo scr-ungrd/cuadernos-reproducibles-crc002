@@ -4,6 +4,7 @@
 
 **Agregado**
 
+- `SECURITY.md` (cómo reportar una vulnerabilidad o una filtración) y `metadata/escaneo_seguridad.md` (registro del escaneo de secretos y de vulnerabilidades del 2026-11-19).
 - Aguas someras no lineales con fricción de Manning (n = 0,025, sin calibrar) y celda seca, en NumPy y en CPU (`run_nswe` en `notebooks/02-simulation.ipynb`, sección 2b), con arreglos de 32 bits. Las LSWE de la 2.2.2 se conservan como comparación.
 - Pruebas del solver no lineal con aserciones (sección 3b del cuaderno 2): reposo exacto en una playa, onda plana, conservación de la masa, cuenco parabólico contra su solución exacta y efecto de la fricción.
 - Sensibilidad de las NSWE a la no linealidad y al coeficiente de Manning (sección 6b; `output/sensibilidad_nswe.csv`) y comparación LSWE frente a NSWE en el cuaderno 3 (sección 5).
@@ -11,6 +12,8 @@
 
 **Cambiado**
 
+- `pillow` 12.3.0 → 13.0.0 en `environment.yml` y en el flujo de despliegue: la versión anterior tenía vulnerabilidades conocidas (`pip-audit`).
+- `.github/workflows/deploy.yml`: permisos mínimos por trabajo, `mystmd` con versión fija y Typst con suma de verificación SHA-256. `.gitignore` excluye `.env`.
 - Resultado principal (`output/resultados.npz`): ahora son las NSWE; las LSWE van a `output/resultados_lswe.npz`. En la celda de Tumaco η máx. pasa de 4,56 a 3,71 m y el arribo no cambia (21,9 min); en celdas de mar de 10 m o más, de 8,8 a 6,2 m. Las razones η simulada / run-up (artículo) cambian en consecuencia.
 - Tiempo de ejecución del cuaderno 2: unos 11 min (antes unos 4); las NSWE a 450 m toman unos 5,5 min.
 - `environment.yml` sin cambios; **no se volvió a verificar en un entorno nuevo, ni en Colab ni en Binder** (los cuadernos 2 y 3 se ejecutaron el 2026-11-18 en un entorno existente).
