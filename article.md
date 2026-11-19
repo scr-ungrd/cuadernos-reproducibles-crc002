@@ -1,9 +1,7 @@
 ---
 title: Simulación del Tsunami de Tumaco de 1979 con Google Colab
-subtitle: Propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) con una fuente de Okada y aguas someras lineales en Google Colab
+subtitle: Propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) con una fuente de Okada y aguas someras no lineales con fricción de Manning en Google Colab
 ---
-
-**Cuaderno 3 — Visualización y comparación con 1979:**
 
 +++ {"no-pdf": true}
 
@@ -17,21 +15,21 @@ subtitle: Propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) con una 
 :::{danger} Ejercicio sin validar: no usar para tomar decisiones
 Este cuaderno **no ha sido validado por una persona experta** en modelación de tsunamis. Es un ejercicio de reproducibilidad y de aprendizaje. Sus resultados **no deben usarse para tomar decisiones** de gestión del riesgo, ordenamiento territorial, diseño de obras, planes de evacuación ni alertas.
 
-Falta, como mínimo: la revisión por una persona experta; la distribución de deslizamiento real del evento (la geometría de la falla es un supuesto); la validación contra observaciones de 1979, que hoy se contradicen entre fuentes (Herd et al., 1981 y NOAA/NGDC); y un modelo no lineal con cálculo de inundación (las amplitudes simuladas están sobreestimadas y el modelo no calcula inundación).
+Falta, como mínimo: la revisión por una persona experta; la distribución de deslizamiento real del evento (la geometría de la falla es un supuesto); la validación contra observaciones de 1979, que hoy se contradicen entre fuentes (Herd et al., 1981 y NOAA/NGDC); y una malla y una topografía finas en la costa (a 450 m la inundación que calcula el modelo no lineal es solo indicativa y las amplitudes simuladas son poco confiables).
 :::
 
 +++ {"part": "abstract"}
 
 El 12 de diciembre de 1979 un terremoto de la zona de subducción colombo-ecuatoriana generó un tsunami que causó cerca de 452 muertes en Nariño {cite:p}`escobar2020tsunami`.
-Este trabajo presenta una simulación reproducible de su propagación en tres cuadernos de Google Colab que corren en CPU. La versión 2 reemplaza la onda en N calibrada de la versión 1 por la
-deformación del fondo de una falla rectangular calculada con el modelo de Okada {cite:p}`okada1985` (Mw 8,3; geometría supuesta), y reemplaza el esquema de Lax-Friedrichs por una malla
-escalonada que no añade difusión numérica. La simulación cubre 110 minutos sobre un dominio de unos 480 × 480 km y 450 m de resolución. **El tiempo de llegada a Tumaco es poco sensible a la resolución y a los parámetros de la falla (19 a 25 min) y coincide en orden de magnitud con los 22 min que modela TUNAMI-N2 {cite:p}`avila2026`; las amplitudes dependen mucho de la fuente (2,3 a 4,6 m en la celda de mar de Tumaco según el caso) y el caso base duplica los 1,9–2,3 m publicados para la isla {cite:p}`escobar2020tsunami`. Las observaciones de 1979 no coinciden entre fuentes (en Tumaco, 0,8 m según Herd et al. y 3 m según NOAA/NGDC), de modo que la comparación es un rango y no una validación.** El producto es un flujo de trabajo y una lectura de sus límites, no un mapa de amenaza.
+Este trabajo presenta una simulación reproducible de su propagación en tres cuadernos de Google Colab que corren en CPU. La versión 2 reemplazó la onda en N calibrada de la versión 1 por la
+deformación del fondo de una falla rectangular calculada con el modelo de Okada {cite:p}`okada1985` (Mw 8,3; geometría supuesta), y el esquema de Lax-Friedrichs por una malla
+escalonada que no añade difusión numérica. La **versión 3** resuelve las ecuaciones de aguas someras **no lineales con fricción de Manning y celda seca**, en NumPy y en CPU, con un diseño inspirado en {cite:t}`madden2023` que no usa sus TPU ni su esquema numérico. La simulación cubre 110 minutos sobre un dominio de unos 480 × 480 km y 450 m de resolución. **El tiempo de llegada a Tumaco es poco sensible a la resolución y a los parámetros de la falla (19 a 25 min) y coincide en orden de magnitud con los 22 min que modela TUNAMI-N2 {cite:p}`avila2026`; las amplitudes dependen mucho de la fuente (2,3 a 4,6 m en la celda de mar de Tumaco según el caso, con las ecuaciones lineales) y el modelo no lineal del caso base da 3,7 m, de 1,6 a 2,0 veces los 1,9–2,3 m publicados para la isla {cite:p}`escobar2020tsunami`. Las observaciones de 1979 no coinciden entre fuentes (en Tumaco, 0,8 m según Herd et al. y 3 m según NOAA/NGDC), de modo que la comparación es un rango y no una validación.** El producto es un flujo de trabajo y una lectura de sus límites, no un mapa de amenaza.
 
 +++ {"part": "keypoints"}
 
-- La fuente es una dislocación elástica de Okada (1985) con Mw 8,3 y una malla escalonada que no añade difusión numérica
+- La fuente es una dislocación elástica de Okada (1985) con Mw 8,3; la propagación usa aguas someras no lineales con fricción de Manning y celda seca en NumPy (se inspira en Madden et al., 2023, sin TPU ni su esquema)
 - El tiempo de llegada a Tumaco cambia poco (19 a 25 min) con la resolución y los parámetros de la falla y es del orden de los 22 min de TUNAMI-N2
-- Las amplitudes simuladas (2,3 a 4,6 m en la celda de Tumaco) dependen de la fuente y el caso base duplica los 1,9–2,3 m publicados para la isla
+- Las amplitudes simuladas (3,7 m en la celda de Tumaco con el modelo no lineal; 2,3 a 4,6 m con el lineal según la fuente) dependen de la fuente y superan entre 1,6 y 2,0 veces los 1,9–2,3 m publicados para la isla
 - Herd et al. (1981) y NOAA/NGDC no coinciden en el run-up de 1979 (Tumaco: 0,8 frente a 3 m); no hay validación
 - Es un ejercicio sin validar por una persona experta: no debe usarse para tomar decisiones
 
@@ -58,6 +56,16 @@ unos 80 km al suroeste de Tumaco, con 33 km de profundidad asignada) es el hipoc
 2. **Anclar la fuente en la física** (dislocación elástica con Mw de la literatura) en lugar de calibrarla, y medir qué tan lejos queda el resultado de las observaciones y de otros modelos.
 3. **Declarar lo que el modelo no puede decir**, para que el cuaderno sirva como paso previo al análisis de amenaza de una ciudad y no se confunda con él.
 
+### Relación con Madden et al. (2023)
+
+Este cuaderno se concibió para reproducir en Google Colab, con el escenario de Tumaco, el trabajo de {cite:t}`madden2023`. Ellos resuelven las ecuaciones de aguas someras no lineales con volúmenes finitos (reconstrucción WENO de quinto orden y Runge-Kutta de tercer orden) en las unidades de procesamiento tensorial (TPU) de Google, con el código `tsunamiTPUlab` (Python y TensorFlow, licencia Apache 2.0), y calculan la inundación de Crescent City (California) a 8 m de resolución, que contrastan con GeoClaw. **Este cuaderno se inspira en ese trabajo, pero no lo reproduce.** Difiere en tres aspectos:
+
+1. **No usa TPU ni TensorFlow.** Ejecutar `tsunamiTPUlab` exige un proyecto de Google Cloud y un depósito de almacenamiento de pago, lo que contradice el requisito de la serie de que cualquier persona pueda ejecutar los cuadernos sin cuenta ni costo (aquí corren en la CPU estándar de Colab y en Binder). Además, con una malla de 450 m y 110 minutos de simulación el problema cabe en una CPU: la ventaja de la TPU aparece con mallas de decenas de millones de celdas, que este escenario no tiene.
+2. **No usa su esquema numérico.** La versión 2 resolvía las ecuaciones lineales. La versión 3 resuelve las **no lineales con fricción de Manning y celda seca**, pero con diferencias finitas en malla escalonada, advección contra-corriente de primer orden y forma de velocidad (no conservativa). Eso no representa la rotura ni los resaltos hidráulicos que un esquema WENO5 conservativo sí puede capturar. No se probó el código de Madden et al. ni se comparó con sus resultados.
+3. **No reproduce su caso ni su resolución.** Ellos usan un modelo de elevación de 4 m para Crescent City; aquí el modelo de elevación disponible para Tumaco es de 15″ (unos 450 m). El único producto de GEM-15 (Google, 15 m) que se revisó el 2026-11-18 tiene dato en cerca del 2 % de un recorte de 44 × 44 km alrededor de Tumaco y en ninguna celda de la ciudad (la revisión no se versionó), así que no sirve para esta zona. La comparación con GeoClaw tampoco se hizo: se verifica el solver con soluciones exactas (incluido el cuenco parabólico que ellos también usan) y con las observaciones de 1979.
+
+De ese trabajo se conservan la formulación no lineal con fricción de Manning, el tratamiento de celda seca y la prueba del cuenco parabólico. Para una inundación a la escala del paper haría falta topografía y batimetría costera de unos 10 m, que no se tiene.
+
 ## Marco teórico
 
 ### De la ruptura al arribo: la cadena de modelación
@@ -66,6 +74,14 @@ El análisis de amenaza por tsunami de origen sísmico sigue una cadena de cuatr
 en aguas someras y evaluar el impacto en la costa con información topo-batimétrica de distinta resolución {cite:p}`ungrd2019atlas`. Las modelaciones colombianas
 de referencia aplican esa cadena: Guapi con TUNAMI-N2, deformación de Okada y batimetría GEBCO {cite:p}`sanchez2023guapi`; Tumaco y Buenaventura con distribuciones de deslizamiento
 de banda ancha {cite:p}`escobar2020tsunami`. Este cuaderno implementa los pasos 1 a 3, con el paso 4 reducido a leer la elevación en celdas de mar cercanas a la costa.
+
+La {numref}`Figura %s <fig-flujo>` resume esa cadena tal como la implementa este cuaderno: los datos y el escenario alimentan la dislocación de Okada, que fija la condición inicial; las ondas se propagan con aguas someras lineales y se leen en las celdas de mar cercanas a la costa.
+
+:::{figure} images/flujo_tsunami.png
+:label: fig-flujo
+:alt: Flujo en cinco etapas: datos de entrada; escenario sísmico, dislocación de Okada y condición inicial; propagación con aguas someras lineales; lectura en celdas de mar cercanas a la costa; y tres productos del escenario determinista de Mw 8,3.
+Flujo de modelación del tsunami de 1979, de los datos y el escenario sísmico a la lectura en la costa (adaptado del flujo de evaluación multiamenaza del libro de Leticia, para una sola amenaza). La línea discontinua marca lo que el cuaderno no calcula. LSWE, ecuaciones lineales de aguas someras; CFL, número de Courant-Friedrichs-Lewy; DEM, modelo digital de elevación. **La figura es de la versión 2:** en la versión 3 el paso 3 resuelve además las ecuaciones no lineales con fricción de Manning y celda seca, y el paso 4 incluye una inundación en tierra solo indicativa a 450 m.
+:::
 
 ### Generación: la dislocación elástica de Okada
 
@@ -93,11 +109,22 @@ $$
 
 Valen en el mar abierto y en la plataforma profunda; cerca de la costa la amplitud deja de ser pequeña frente a la profundidad y las LSWE sobreestiman la elevación porque no disipan energía. **La elevación de un modelo lineal no es el run-up.**
 
+La versión 3 resuelve las NSWE. Con la profundidad total $D = H + \eta$ y la velocidad $\mathbf{U} = (u, v)$:
+
+$$
+\frac{\partial \eta}{\partial t} + \nabla\cdot(D\mathbf{U}) = 0, \qquad
+\frac{\partial \mathbf{U}}{\partial t} + (\mathbf{U}\cdot\nabla)\mathbf{U} + g\nabla\eta + \frac{g n^2 |\mathbf{U}|}{D^{4/3}}\,\mathbf{U} = 0,
+$$
+
+donde $n$ es el coeficiente de rugosidad de Manning. Se usa $n = 0{,}025$ s·m⁻¹ᐟ³ en todo el dominio, un valor típico que **no se calibró ni se verificó para esta costa**. El término de fricción solo importa en agua somera ($D^{-4/3}$), de modo que en el océano profundo las NSWE y las LSWE dan casi lo mismo.
+
 ### Esquema numérico
 
 La versión 1 usaba Lax-Friedrichs en una malla colocada, un esquema de primer orden cuya difusión numérica atenuaba la ola, de modo que hubo que inflar la amplitud inicial. La versión 2 usa una **malla escalonada de Arakawa C con el esquema *forward-backward***:
 $\eta$ en el centro de las celdas, los flujos en las caras, y los flujos se actualizan con el $\eta$ ya actualizado. Es un esquema clásico de diferencias finitas para aguas someras. En una onda plana de 35 km de longitud de onda que recorre
 119 km, el esquema de la versión 1 conserva el 43 % de la amplitud y el escalonado el 99,96 % (prueba en el cuaderno 2). Las fronteras abiertas usan la condición de radiación $M = \pm\sqrt{gH}\,\eta$.
+
+La **versión 3** conserva la malla escalonada y el paso *forward-backward* y añade: (i) la advección, con diferencias contra-corriente de primer orden y en forma de velocidad (no conservativa); (ii) la fricción de Manning, semi-implícita para que no invierta el flujo; y (iii) la **celda seca**: una cara solo transporta agua si el agua sobre el terreno más alto de sus dos celdas supera 1 cm, y un limitador impide sacar de una celda más agua de la que contiene. La cara que se activa hereda la velocidad de la vecina del lado mojado; sin ese paso el frente de mojado pierde impulso. Se verificó con el cuenco parabólico unidimensional contra su solución exacta (error relativo de la profundidad tras un periodo: ver cuaderno 2, sección 3b). La forma de velocidad no es conservativa y **no representa la rotura de la ola ni los resaltos hidráulicos**. Los arreglos son de 32 bits, lo que reduce el tiempo de ejecución a la mitad (los resultados coinciden con los de 64 bits en las estaciones a 0,01 m).
 
 ### Determinista frente a probabilista
 
@@ -143,8 +170,8 @@ Deformación vertical del fondo (η inicial) del escenario de Mw 8,3. Líneas di
 | Paso de tiempo | 1 s | $\mathrm{CFL}=c_{\max}\,\Delta t\,\sqrt{2}/\Delta x = 0{,}70 < 1$ |
 | Duración | 6 600 s (110 min) | Incluye la primera ola positiva observada en el mareógrafo de Buenaventura (99 min) y ondas reflejadas |
 | Instantáneas | cada 240 s | 28 cuadros para la animación |
-| Fricción | Ninguna | Solo hay linealidad; los términos de Manning de la versión 1 eran no lineales y se retiran |
-| Tiempo de ejecución | ~45 s para 110 min | CPU estándar |
+| Fricción | Manning, $n = 0{,}025$ | Valor típico, sin calibrar; las LSWE (comparación) no tienen fricción |
+| Tiempo de ejecución | ~5,5 min (NSWE) y ~1 min (LSWE) para 110 min | CPU de un Apple M1; el cuaderno 2 completo toma unos 11 min |
 
 ### Estaciones y control de calidad de las observaciones
 
@@ -157,19 +184,18 @@ Cada estación se lee en la celda de mar más cercana con profundidad de al meno
 
 ### Elevación máxima
 
-La elevación máxima en celdas de 10 m de profundidad o más es de 8,8 m ({numref}`fig-max-eta`). Se concentra en una franja sobre la falla y en la costa frente al epicentro, de Tumaco hacia el sur. En celdas de menos de 10 m el modelo lineal llega a 40 m, una amplificación
-sin fricción ni rotura que no se interpreta.
+La elevación máxima en celdas de 10 m de profundidad o más es de 6,2 m con el modelo no lineal ({numref}`fig-max-eta`), frente a 8,8 m con el lineal. Se concentra en una franja sobre la falla y en la costa frente al epicentro, de Tumaco hacia el sur. En celdas de menos de 10 m el modelo no lineal llega a 7 m (el lineal llegaba a 40 m); con celdas de 450 m eso es amplificación en agua somera y no se interpreta.
 
 :::{figure} notebooks/max_eta_map.png
 :label: fig-max-eta
 :alt: Elevación máxima de la ola
-Elevación máxima de la superficie del mar en 110 min (LSWE). Izquierda: dominio completo, solo celdas de 10 m de profundidad o más. Derecha: plataforma de Tumaco (10–200 m).
+Elevación máxima de la superficie del mar en 110 min (NSWE, Manning 0,025). Izquierda: dominio completo, solo celdas de 10 m de profundidad o más. Derecha: plataforma de Tumaco (10–200 m).
 :::
 
 ### Series de tiempo
 
-Frente a Tumaco la primera señal es un descenso del nivel (la subsidencia cosísmica inicial y un valle previo a la ola); el primer ascenso mayor de 0,1 m llega a los 22 min y la cresta máxima (4,6 m) a los 29 min, seguida de un descenso de unos 8 m ({numref}`fig-timeseries`).
-Ese vaivén tan grande es típico de un modelo sin fricción en una bahía somera, donde la energía queda atrapada y se refleja. En Esmeraldas el nivel ya es negativo en el instante inicial y el primer ascenso llega a los 11 min. En Buenaventura la celda de 5 m no registra ninguna ola mayor de 0,1 m en 110 min.
+Frente a Tumaco la primera señal es un descenso del nivel (la subsidencia cosísmica inicial y un valle previo a la ola); el primer ascenso mayor de 0,1 m llega a los 22 min y la cresta máxima (3,7 m) a los 28 min; el nivel baja hasta −3,3 m ({numref}`fig-timeseries`).
+El vaivén persiste con fricción de Manning; es esperable en una bahía somera, donde la energía queda atrapada y se refleja, pero no se verificó con una malla más fina. En Esmeraldas el nivel ya es negativo en el instante inicial y el primer ascenso llega a los 11 min. En Buenaventura la celda de 5 m no registra ninguna ola mayor de 0,1 m en 110 min.
 
 :::{figure} notebooks/time_series.png
 :label: fig-timeseries
@@ -181,11 +207,11 @@ Series de η en siete estaciones. Línea discontinua roja: tiempo observado (pri
 
 | Estación | Run-up Herd (m) | Run-up NOAA/NGDC (m) | η máx. sim. (m) | η sim./Herd | η sim./NOAA |
 |---|---|---|---|---|---|
-| Tumaco | 0,8 | 3,0 | 4,6 | 5,7 | 1,5 |
-| San Juan de la Costa | 2,5 | 6,0 | 2,2 | 0,86 | 0,36 |
-| Isla Gorgona | — | 5,0 | 0,6 | — | 0,12 |
-| Guapi | — | 2,0 | 0,5 | — | 0,25 |
-| Vuelta Larga | — | 3,0 | 0,5 | — | 0,17 |
+| Tumaco | 0,8 | 3,0 | 3,7 | 4,6 | 1,2 |
+| San Juan de la Costa | 2,5 | 6,0 | 1,5 | 0,59 | 0,25 |
+| Isla Gorgona | — | 5,0 | 0,4 | — | 0,08 |
+| Guapi | — | 2,0 | 0,4 | — | 0,21 |
+| Vuelta Larga | — | 3,0 | 0,4 | — | 0,14 |
 
 Con dos fuentes que se contradicen y pocos puntos **no se calcula un RMSE ni un R²**. Lo que sí se puede decir ({numref}`fig-validation`):
 
@@ -195,12 +221,12 @@ Con dos fuentes que se contradicen y pocos puntos **no se calcula un RMSE ni un 
 Izquierda: tiempo observado y simulado de la primera ola positiva (solo Buenaventura). Derecha: run-up de Herd et al. (1981) y de NOAA/NGDC, y η máxima simulada en el mar; no son magnitudes equivalentes.
 :::
 
-- **Tiempos.** Solo hay dos. En Buenaventura la primera ola positiva se midió a los 99 min y el modelo **no produce ninguna ola mayor de 0,1 m** en 110 min en la celda de 5 m (la amplitud observada, 0,14 m, está apenas sobre ese umbral). En Esmeraldas el retroceso observado a los 5–6 min **coincide en signo** con el descenso que el modelo ya tiene en t = 0, pero el tiempo no es comparable porque la fuente es instantánea. En Tumaco no hay hora de llegada observada; los 22 min simulados coinciden con los de {cite:t}`avila2026`.
-- **Amplitudes.** La razón entre η simulada y run-up va de 0,12 a 5,7 según la estación y la fuente: no hay un sesgo único. En Tumaco el modelo da 5,7 veces el valor de Herd y 1,5 veces el de NOAA/NGDC, y unas dos veces las alturas máximas de 1,88–2,30 m que {cite:t}`escobar2020tsunami` obtienen para la isla de Tumaco con el escenario de 1979. En San Juan de la Costa queda por debajo de las dos fuentes y en Isla Gorgona, Guapi y Vuelta Larga entre 4 y 8 veces por debajo de NOAA/NGDC. Una celda de mar de 10 a 44 m de profundidad, a varios kilómetros de la coordenada, no representa un run-up, así que estas razones se leen como orden de magnitud.
+- **Tiempos.** Los de las NSWE y las LSWE coinciden con diferencias menores de 0,5 min en todas las estaciones comparables. Solo hay dos tiempos observados. En Buenaventura la primera ola positiva se midió a los 99 min y el modelo **no produce ninguna ola mayor de 0,1 m** en 110 min en la celda de 5 m (la amplitud observada, 0,14 m, está apenas sobre ese umbral). En Esmeraldas el retroceso observado a los 5–6 min **coincide en signo** con el descenso que el modelo ya tiene en t = 0, pero el tiempo no es comparable porque la fuente es instantánea. En Tumaco no hay hora de llegada observada; los 22 min simulados coinciden con los de {cite:t}`avila2026`.
+- **Amplitudes.** La razón entre η simulada y run-up va de 0,08 a 4,6 según la estación y la fuente: no hay un sesgo único. En Tumaco el modelo da 4,6 veces el valor de Herd y 1,2 veces el de NOAA/NGDC, y entre 1,6 y 2,0 veces las alturas máximas de 1,88–2,30 m que {cite:t}`escobar2020tsunami` obtienen para la isla de Tumaco con el escenario de 1979. En San Juan de la Costa queda por debajo de las dos fuentes y en Isla Gorgona, Guapi y Vuelta Larga entre 5 y 12 veces por debajo de NOAA/NGDC. Una celda de mar de 10 a 44 m de profundidad, a varios kilómetros de la coordenada, no representa un run-up, así que estas razones se leen como orden de magnitud.
 
 ### Sensibilidad
 
-Con la malla de 900 m, que corre en 4 s, se varió un parámetro a la vez ({numref}`tbl-sens`).
+Con la malla de 900 m, que corre en 4 s con las LSWE, se varió un parámetro a la vez ({numref}`tbl-sens`). Esta tabla es de las **ecuaciones lineales**; la no linealidad y la fricción se analizan aparte ({numref}`tbl-sens-nswe`).
 
 :::{table} Respuesta en la celda de Tumaco al variar un parámetro a la vez. «v1» son los parámetros documentados en la versión 1 (Mw 8,2; rumbo 10°; buzamiento 20°; 250 × 100 km).
 :label: tbl-sens
@@ -218,6 +244,19 @@ Con la malla de 900 m, que corre en 4 s, se varió un parámetro a la vez ({numr
 La **resolución** casi no mueve la celda de Tumaco (de 4,56 a 4,55 m y sin cambio en el arribo), aunque en San Juan de la Costa pasa de 2,2 a 3,2 m porque la celda elegida cambia; la comparación por estación depende de esa elección. La **fuente** pesa mucho: entre el caso más pequeño (parámetros de la versión 1) y el más grande, la amplitud en Tumaco varía de 2,3 a 4,6 m. El arribo
 es robusto, de 19 a 25 min en todos los casos.
 
+:::{table} Respuesta a 900 m del modelo lineal y del no lineal con distinto coeficiente de Manning ($n$, s·m⁻¹ᐟ³; el intervalo es el habitual y **no está calibrado**). «Celdas inundadas» son las celdas de 900 m de tierra con más de 0,5 m de agua.
+:label: tbl-sens-nswe
+| Modelo | Tumaco η máx. (m) | Tumaco arribo (min) | San Juan de la Costa η máx. (m) | Guapi η máx. (m) | Celdas inundadas |
+|---|---|---|---|---|---|
+| LSWE (sin fricción) | 4,55 | 21,9 | 3,17 | 0,50 | 0 |
+| NSWE, $n = 0{,}040$ | 3,45 | 21,9 | 1,76 | 0,36 | 78 |
+| NSWE, $n = 0{,}025$ | 3,41 | 21,8 | 1,80 | 0,41 | 134 |
+| NSWE, $n = 0{,}015$ | 3,38 | 21,8 | 1,81 | 0,46 | 184 |
+| NSWE, sin fricción | 3,38 | 21,8 | 1,82 | 0,49 | 298 |
+:::
+
+La **no linealidad** reduce la amplitud en Tumaco de 4,55 a unos 3,4 m (−25 %) sin mover el arribo. La **fricción** casi no cambia la elevación en las celdas de mar de 10 m o más (3,38 a 3,45 m en Tumaco), pero sí el avance sobre tierra: el área inundada se reduce a menos de la tercera parte entre $n \approx 0$ y $n = 0{,}040$. Es coherente con que la fricción actúe donde la profundidad es pequeña, pero a 900 m las celdas inundadas solo sirven como indicador relativo.
+
 ### Animación de la propagación
 
 La {numref}`fig-animation` muestra la propagación con el oeste a la izquierda y el norte arriba. El lóbulo de levantamiento nace sobre la falla, junto a la estrella, y se divide en una ola que viaja hacia la costa y otra hacia el océano abierto. La estrella
@@ -226,22 +265,22 @@ marca el epicentro; en la versión 1 el mapa estaba espejado y la fuente nacía 
 :::{figure} notebooks/tsunami_propagation.gif
 :label: fig-animation
 :alt: Animación de la propagación del tsunami
-Animación de la propagación del tsunami de Tumaco 1979 (LSWE de la versión 2, 28 cuadros, t = 0–108 min). Escala de color: η en metros (se omiten |η| < 0,1 m y celdas de menos de 10 m de profundidad). La estrella roja es el epicentro.
+Animación de la propagación del tsunami de Tumaco 1979 (NSWE de la versión 3, 28 cuadros, t = 0–108 min). Escala de color: η en metros (se omiten |η| < 0,1 m y celdas de menos de 10 m de profundidad). La estrella roja es el epicentro.
 :::
 
 ## Alcance: qué se puede y qué no se puede concluir
 
 **Lo que el cuaderno sí sustenta.**
 
-- **El tiempo de llegada a Tumaco ronda los 20–25 min y es robusto.** Cambia poco con la resolución y con los parámetros supuestos (19 a 25 min), y coincide con un modelo no lineal publicado {cite:p}`avila2026`. Para el análisis de riesgo de una ciudad es la cifra más útil: el tiempo disponible para evacuar de una fuente cercana es de minutos {cite:p}`ungrd2019atlas`,
+- **El tiempo de llegada a Tumaco ronda los 20–25 min y es robusto.** Cambia poco con la resolución, con los parámetros supuestos (19 a 25 min), con la no linealidad y con la fricción (21,8 a 21,9 min a 900 m), y coincide con un modelo no lineal publicado {cite:p}`avila2026`. Para el análisis de riesgo de una ciudad es la cifra más útil: el tiempo disponible para evacuar de una fuente cercana es de minutos {cite:p}`ungrd2019atlas`,
   y aquí son del orden de 20.
 - **La ola no es una sola.** Tras un descenso inicial llegan varias crestas durante al menos 30–45 min, y la máxima no es la primera. Un plan de evacuación no debe darse por terminado con el primer ascenso.
-- **El flujo de trabajo es reproducible** y verificado: Okada contra una implementación independiente, onda plana contra la solución exacta, reposo exacto y fuente ligada al epicentro (prueba automática).
+- **El flujo de trabajo es reproducible** y verificado: Okada contra una implementación independiente, onda plana contra la solución exacta, reposo exacto, conservación de la masa y cuenco parabólico contra su solución exacta para las NSWE, y fuente ligada al epicentro (pruebas automáticas).
 
 **Lo que no sustenta.**
 
-- **No es un mapa de amenaza ni da inundación.** Las LSWE no calculan inundación en tierra. Las profundidades de inundación y las zonas seguras (por ejemplo, el umbral de 0,3 m que usa {cite:t}`avila2026`) requieren NSWE con celda seca y topografía fina de las islas de Tumaco.
-- **Las amplitudes no son confiables en valor absoluto.** Dependen mucho de una fuente cuya geometría es un supuesto y en Tumaco el caso base duplica lo publicado. Sirven para comparar escenarios entre sí, no para dimensionar obras ni tasas de daño.
+- **No es un mapa de amenaza.** Las NSWE de la versión 3 inundan la tierra, pero con celdas de 450 m (más grandes que la isla de Tumaco) y sin rotura de la ola la profundidad de inundación es solo indicativa. Las zonas seguras (por ejemplo, el umbral de 0,3 m que usa {cite:t}`avila2026`) requieren topografía y batimetría finas de las islas de Tumaco.
+- **Las amplitudes no son confiables en valor absoluto.** Dependen mucho de una fuente cuya geometría es un supuesto y en Tumaco el caso base da de 1,6 a 2,0 veces lo publicado. Sirven para comparar escenarios entre sí, no para dimensionar obras ni tasas de daño.
 - **No es una validación.** Las dos fuentes de run-up de 1979 se contradicen (factor de 2,4 a 3,8 donde coinciden), solo hay dos tiempos documentados y en uno de ellos (Buenaventura) el modelo no reproduce la ola. Una concordancia con cualquiera de las dos habría sido casual.
 
 **Cómo entra en el cálculo del riesgo.** El producto de amenaza que necesita el cálculo es la profundidad de inundación por escenario o por periodo de retorno; este cuaderno aporta el paso de propagación y el tiempo de arribo. La
@@ -251,16 +290,16 @@ la inundación, no sobre la elevación en el mar.
 ## Instrucciones de reproducción
 
 1. **Cuaderno 1** (`01-bathymetry.ipynb`): lee o descarga el DEM, lo reproyecta a UTM 17N y comprueba la orientación. Menos de 1 min.
-2. **Cuaderno 2** (`02-simulation.ipynb`): escenario de Okada, solver, pruebas, simulación de 110 min y sensibilidad. Unos 4 min.
+2. **Cuaderno 2** (`02-simulation.ipynb`): escenario de Okada, solver, pruebas, simulación de 110 min y sensibilidad. Unos 11 min (las NSWE a 450 m toman unos 5,5 minutos).
 3. **Cuaderno 3** (`03-visualization.ipynb`): mapas, series, control de calidad, comparación y animación. 1–2 min.
 
 :::{note}
-El 2026-11-17 los tres cuadernos corrieron completos en un entorno limpio creado desde `environment.yml` (Python 3.10, versiones exactas) en 150 s en un Apple M1, sin GPU y sin errores; los resultados coinciden con los publicados. Los tres cuadernos funcionan en la CPU estándar de Colab y no necesitan TPU ni GPU. Si se abren en Colab, el cuaderno 2 requiere el DEM del cuaderno 1 o la copia de `data/`.
+El 2026-11-18 los cuadernos 2 y 3 corrieron completos en un Apple M1, sin GPU y sin errores (cuaderno 2: 11 min; cuaderno 3: 12 s), pero en un entorno de trabajo existente y no en uno nuevo creado desde `environment.yml`; el cuaderno 1 no cambió desde la versión 2.2.2, que sí se ejecutó el 2026-11-17 en un entorno limpio. No se probó en Colab ni en Binder y no se midió el tiempo en una CPU de Colab (más lenta que un M1). Los cuadernos no necesitan TPU ni GPU. Si se abren en Colab, el cuaderno 2 requiere el DEM del cuaderno 1 o la copia de `data/`.
 :::
 
 ## Limitaciones y trabajo futuro
 
-1. **Linealidad y sin fricción.** Una versión no lineal (NSWE) con fricción de Manning y tratamiento de celda seca calcularía inundación y amortiguaría los vaivenes.
+1. **Esquema de las NSWE.** Primer orden en la advección y forma de velocidad (no conservativa): no representa la rotura ni los resaltos hidráulicos. Un esquema de volúmenes finitos conservativo de orden alto, como el de {cite:t}`madden2023`, y una comparación con GeoClaw o con `tsunamiTPUlab` serían el siguiente paso. El coeficiente de Manning (0,025) es un valor típico sin calibrar.
 2. **Fuente.** Falla única de deslizamiento uniforme con geometría supuesta. Debe reemplazarse por la distribución de deslizamiento de Poveda y Pulido (2019) y verificar el epicentro, la profundidad y el mecanismo contra Herd et al. (1981) y Yoshimoto et al. (2017).
 3. **Generación instantánea y desacoplada**, sin filtro por la columna de agua ni desplazamiento horizontal sobre el talud.
 4. **Resolución.** 450 m no capturan las islas de Tumaco ni el estuario; hacen falta mallas anidadas con batimetría local.
@@ -269,8 +308,8 @@ El 2026-11-17 los tres cuadernos corrieron completos en un entorno limpio creado
 
 ## Conclusiones
 
-Se simuló la propagación del tsunami de Tumaco de 1979 con una fuente de Okada y un esquema sin difusión numérica, sin parámetro de calibración, en NumPy y en Colab. El tiempo de arribo a Tumaco (19–25 min) es robusto y consistente con un modelo publicado;
-la amplitud es sensible a una geometría de falla que aún es un supuesto y en Tumaco duplica lo publicado. Las observaciones de 1979 se contradicen entre fuentes y en Buenaventura el modelo no reproduce la ola, así que no hay validación. La versión 2 corrige los errores de la versión 1 (mapa espejado, fuente desligada del epicentro, atribución de los datos, estaciones fuera del dominio) y deja
+Se simuló la propagación del tsunami de Tumaco de 1979 con una fuente de Okada y aguas someras no lineales con fricción de Manning y celda seca, sin parámetro de calibración, en NumPy y en CPU; el diseño se inspira en {cite:t}`madden2023` pero no usa TPU ni su esquema. El tiempo de arribo a Tumaco (19–25 min) es robusto y consistente con un modelo publicado;
+la amplitud es sensible a una geometría de falla que aún es un supuesto y en Tumaco da de 1,6 a 2,0 veces lo publicado (la no linealidad la reduce entre 19 % y 25 % respecto al modelo lineal). Las observaciones de 1979 se contradicen entre fuentes y en Buenaventura el modelo no reproduce la ola, así que no hay validación. La versión 2 corrigió los errores de la versión 1 (mapa espejado, fuente desligada del epicentro, atribución de los datos, estaciones fuera del dominio) y deja
 explícito lo que falta para pasar de un escenario de propagación a un análisis de amenaza.
 
 ## Disponibilidad de datos y código

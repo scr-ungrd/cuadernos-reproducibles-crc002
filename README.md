@@ -8,7 +8,7 @@
 
 ## Qué hace
 
-Simula la propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) en el Pacífico colombiano con una fuente de Okada y aguas someras lineales, en tres cuadernos que corren en Google Colab sin GPU: batimetría (`01-bathymetry.ipynb`), simulación (`02-simulation.ipynb`) y visualización (`03-visualization.ipynb`). El alcance y las limitaciones están en el artículo (`article.md`).
+Simula la propagación del tsunami del 12 de diciembre de 1979 (Mw 8,3) en el Pacífico colombiano con una fuente de Okada y aguas someras no lineales con fricción de Manning y celda seca (versión 3; las lineales de la versión 2 se conservan como comparación), en tres cuadernos que corren en Google Colab sin GPU ni TPU. Se inspira en Madden et al. (2023) pero no usa su código ni su esquema: batimetría (`01-bathymetry.ipynb`), simulación (`02-simulation.ipynb`) y visualización (`03-visualization.ipynb`). El alcance y las limitaciones están en el artículo (`article.md`).
 
 ## Estructura
 

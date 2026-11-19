@@ -204,8 +204,9 @@ nb2 = [
 
 [![Abrir en Colab](https://colab.research.google.com/assets/colab-badge.svg)]({COLAB}02-simulation.ipynb)
 
-Propagación del tsunami del 12 de diciembre de 1979 con **ecuaciones de aguas someras lineales (LSWE)** en **NumPy puro**. Cambios respecto a la
-versión 1:
+Propagación del tsunami del 12 de diciembre de 1979 en **NumPy puro**. La **versión 3** resuelve las **ecuaciones de aguas someras no lineales (NSWE) con fricción de Manning y celda seca**
+y conserva las lineales (LSWE) de la versión 2 como línea de comparación. El diseño se inspira en Madden et al. (2023), que resuelven las NSWE con volúmenes finitos en TPU de Google;
+**este cuaderno no usa TPU ni su esquema** (véase el artículo): usa diferencias finitas en malla escalonada, en CPU. Cambios de la versión 2 respecto a la 1:
 
 | | Versión 1 | Versión 2 |
 |---|---|---|
@@ -215,7 +216,7 @@ versión 1:
 | Fronteras | Reflejantes (Neumann) | Abiertas (radiación) |
 | Dominio | 0,5–3,5° N, 79,5–77° O | 0,2° S–4,2° N, 81,2–76,9° O |
 
-**Runtime:** CPU, unos 4 minutos. **Se ejecuta el cuaderno 1 antes** (o se descarga el DEM automáticamente).
+**Runtime:** CPU, unos 10 minutos (las NSWE a 450 m toman unos 3 minutos). **Se ejecuta el cuaderno 1 antes** (o se descarga el DEM automáticamente).
 """),
     code(COMUN),
     md("""
@@ -292,18 +293,26 @@ def a_utm(ruta, dx):
                   dst_transform=tf, dst_crs=CRS_UTM, resampling=Resampling.bilinear, dst_nodata=np.nan)
     return arr, tf
 
-def cargar_H(dx):
-    """Profundidad en reposo H (m; 0 en tierra y en celdas sin dato) y transformación afín."""
+def cargar_dem(dx):
+    """DEM en UTM 17N (m sobre el nivel del mar; negativo en el mar, NaN sin dato) con celdas de `dx` m, y su transformación afín."""
     ruta = OUT / 'dem_utm17_450m.tif'
     if dx == 450. and ruta.exists():
-        with rasterio.open(ruta) as s: dem, tf = s.read(1), s.transform
-    else:
-        try:
-            geo = datos('dem_tumaco_noaa_15s.tif')
-        except Exception as e:
-            raise RuntimeError('Ejecute primero el cuaderno 1 (no se encontró el DEM).') from e
-        dem, tf = a_utm(geo, dx)
+        with rasterio.open(ruta) as s: return s.read(1), s.transform
+    try:
+        geo = datos('dem_tumaco_noaa_15s.tif')
+    except Exception as e:
+        raise RuntimeError('Ejecute primero el cuaderno 1 (no se encontró el DEM).') from e
+    return a_utm(geo, dx)
+
+def cargar_H(dx):
+    """Profundidad en reposo H (m; 0 en tierra y en celdas sin dato) y transformación afín."""
+    dem, tf = cargar_dem(dx)
     return np.where(np.isnan(dem), 0.0, np.maximum(-dem, 0.0)), tf
+
+def cargar_z(dx):
+    """Cota del terreno z (m; negativa en el mar) para las NSWE. Las celdas sin dato (0,4 %) se tratan como tierra a +10 m."""
+    dem, tf = cargar_dem(dx)
+    return np.where(np.isnan(dem), 10.0, dem), tf
 
 def eta_inicial(tf, shape, esc):
     """Deformación vertical del fondo (m) en cada celda para el escenario `esc`; devuelve (eta0, deslizamiento)."""
@@ -399,6 +408,128 @@ def run_lswe(H, dx, eta0, dt, t_end, out_every, estaciones=None, umbral=0.1, fro
 print('✓ Solver definido')
 '''),
     md("""
+### 2b. Solver NSWE: aguas someras no lineales con fricción de Manning y celda seca
+
+Con la profundidad total $D = H + \\eta$ (donde $H$ es la profundidad en reposo; en tierra, negativa) y la velocidad $(u, v)$:
+
+$$
+\\frac{\\partial \\eta}{\\partial t} + \\frac{\\partial (Du)}{\\partial x} + \\frac{\\partial (Dv)}{\\partial y} = 0, \\qquad
+\\frac{\\partial u}{\\partial t} + u\\frac{\\partial u}{\\partial x} + v\\frac{\\partial u}{\\partial y} + g\\frac{\\partial \\eta}{\\partial x} + \\frac{g n^2 |\\mathbf{U}|}{D^{4/3}}\\,u = 0,
+$$
+
+y la ecuación análoga para $v$, con $n$ el coeficiente de rugosidad de Manning (aquí **0,025 s·m⁻¹ᐟ³ en todo el dominio**, un valor típico de los modelos de tsunami que **no se calibró ni se verificó para esta costa**).
+Diferencias con las LSWE y con la implementación de Madden et al. (2023):
+
+- **Misma malla escalonada y paso *forward-backward*.** La continuidad usa la profundidad en las caras y un limitador que impide sacar de una celda más agua de la que tiene.
+- **Celda seca.** Una cara solo transporta agua si el agua sobre el terreno más alto de sus dos celdas supera 1 cm. Así el reposo es exacto también en una playa y el agua puede avanzar sobre tierra.
+  La cara que se activa hereda la velocidad de la vecina del lado mojado; sin eso el frente pierde impulso (se midió con el cuenco parabólico, sección 3b).
+- **Advección** con diferencias contra-corriente de primer orden, **en forma de velocidad** (no conservativa): sirve para ondas suaves y para el avance del agua, **no representa la rotura ni los resaltos hidráulicos**.
+  Madden et al. usan volúmenes finitos conservativos de quinto orden (WENO5) y Runge-Kutta de tercer orden.
+- **Fricción de Manning** semi-implícita (no puede invertir el sentido del flujo).
+- **Aritmética de 32 bits**: reduce a la mitad el tiempo de ejecución. Se verifica contra soluciones exactas (sección 3b).
+- A 450 m la inundación en tierra es **solo indicativa**: una celda es más grande que toda la isla de Tumaco.
+"""),
+    code('''
+DT32 = np.float32   # tipo de los arreglos del solver NSWE
+
+def run_nswe(z, dx, h_ini, dt, t_end, out_every, estaciones=None, umbral=0.1, manning=0.025,
+             dmin=0.01, frontera='abierta', umax=30.0, heredar=True):
+    """NSWE en malla C (forma de velocidad) con fricción de Manning y celda seca.
+    z: cota del terreno (m; negativa en el mar). h_ini: profundidad inicial (m; el agua inicial, con la deformación sumada).
+    Estado: profundidad h y superficie s = z + h. Una cara está activa si el agua sobre el terreno más alto de sus dos celdas
+    supera `dmin` (m): max(s_izq, s_der) - max(z_izq, z_der) > dmin; sin agua no hay flujo, de modo que el reposo es exacto.
+    `umax` (m/s) acota la velocidad en el frente de mojado. frontera: 'abierta' (radiación) o 'pared'.
+    Devuelve η máxima en el mar, tiempo del primer ascenso, instantáneas, series en `estaciones`, profundidad máxima en tierra (`inund`) y h final."""
+    ny, nx = z.shape
+    z = z.astype(DT32); h = np.maximum(h_ini, 0.0).astype(DT32); s = z + h
+    u = np.zeros((ny, nx + 1), DT32); v = np.zeros((ny + 1, nx), DT32)
+    sea = z < 0
+    c = np.sqrt(G * np.maximum(-z, 0.0))
+    cfl = float(c.max()) * dt * np.sqrt(2.0) / dx
+    assert cfl < 1.0, f'CFL = {cfl:.2f} >= 1'
+    zx = np.maximum(z[:, :-1], z[:, 1:]); zy = np.maximum(z[:-1, :], z[1:, :])
+    nsteps = int(round(t_end / dt)); cada = int(round(out_every / dt))
+    mojada = lambda: np.where(h > dmin, s, 0.0)           # elevación sobre el nivel del mar donde hay agua
+    eta = mojada()
+    maxeta = np.where(sea, eta, 0.0); maxh_tierra = np.zeros_like(h)
+    tarr = np.full(z.shape, np.nan, 'float32')
+    snap_t, snaps = [0.0], [eta.astype('float16')]
+    if estaciones:
+        ij = np.array(estaciones); rec = np.zeros((nsteps + 1, len(ij)), 'float32'); rec[0] = eta[ij[:, 0], ij[:, 1]]
+    else:
+        ij = None; rec = None
+    n2g = G * manning ** 2
+
+    def prof_caras(s_, h_):
+        """Profundidad del agua en las caras de las celdas (en la frontera, la de la celda del borde)."""
+        Dx = np.empty((ny, nx + 1), DT32); Dy = np.empty((ny + 1, nx), DT32)
+        Dx[:, 1:-1] = np.maximum(s_[:, :-1], s_[:, 1:]) - zx; Dx[:, 0] = h_[:, 0]; Dx[:, -1] = h_[:, -1]
+        Dy[1:-1, :] = np.maximum(s_[:-1, :], s_[1:, :]) - zy; Dy[0, :] = h_[0, :]; Dy[-1, :] = h_[-1, :]
+        return Dx, Dy
+
+    for n in range(1, nsteps + 1):
+        # 1) continuidad: flujo = profundidad de la cara × velocidad, con limitador para no vaciar más de lo que hay
+        Dx, Dy = prof_caras(s, h)
+        Mx = np.where(Dx > dmin, Dx * u, 0.0); Ny = np.where(Dy > dmin, Dy * v, 0.0)
+        sal = dt / dx * (np.maximum(Mx[:, 1:], 0) - np.minimum(Mx[:, :-1], 0) + np.maximum(Ny[1:, :], 0) - np.minimum(Ny[:-1, :], 0))
+        f = np.where(sal > h, h / np.maximum(sal, 1e-30), 1.0)
+        Mx[:, 1:-1] *= np.where(Mx[:, 1:-1] > 0, f[:, :-1], f[:, 1:])
+        Mx[:, 0] *= np.where(Mx[:, 0] < 0, f[:, 0], 1.0); Mx[:, -1] *= np.where(Mx[:, -1] > 0, f[:, -1], 1.0)
+        Ny[1:-1, :] *= np.where(Ny[1:-1, :] > 0, f[:-1, :], f[1:, :])
+        Ny[0, :] *= np.where(Ny[0, :] < 0, f[0, :], 1.0); Ny[-1, :] *= np.where(Ny[-1, :] > 0, f[-1, :], 1.0)
+        h -= dt / dx * ((Mx[:, 1:] - Mx[:, :-1]) + (Ny[1:, :] - Ny[:-1, :]))
+        np.maximum(h, 0.0, out=h)
+        s = z + h
+        # 2) cantidad de movimiento con la superficie nueva
+        Dx, Dy = prof_caras(s, h)
+        ax = Dx[:, 1:-1] > dmin; ay = Dy[1:-1, :] > dmin
+        Dxi = np.where(ax, Dx[:, 1:-1], 1.0); Dyi = np.where(ay, Dy[1:-1, :], 1.0)
+        ui = u[:, 1:-1]; vi = v[1:-1, :]
+        vb = 0.25 * (v[:-1, :-1] + v[:-1, 1:] + v[1:, :-1] + v[1:, 1:])     # v en las caras de u
+        ub = 0.25 * (u[:-1, :-1] + u[:-1, 1:] + u[1:, :-1] + u[1:, 1:])     # u en las caras de v
+        # advección con diferencias contra-corriente de primer orden; en el borde se replica el valor vecino
+        up = np.pad(u, ((1, 1), (0, 0)), mode='edge'); vp = np.pad(v, ((0, 0), (1, 1)), mode='edge')
+        dudx = np.where(ui > 0, u[:, 1:-1] - u[:, :-2], u[:, 2:] - u[:, 1:-1]) / dx
+        dudy = np.where(vb > 0, up[1:-1, 1:-1] - up[:-2, 1:-1], up[2:, 1:-1] - up[1:-1, 1:-1]) / dx
+        dvdy = np.where(vi > 0, v[1:-1, :] - v[:-2, :], v[2:, :] - v[1:-1, :]) / dx
+        dvdx = np.where(ub > 0, vp[1:-1, 1:-1] - vp[1:-1, :-2], vp[1:-1, 2:] - vp[1:-1, 1:-1]) / dx
+        un = ui - dt * (G * (s[:, 1:] - s[:, :-1]) / dx + np.where(ax, ui * dudx + vb * dudy, 0.0))
+        vn = vi - dt * (G * (s[1:, :] - s[:-1, :]) / dx + np.where(ay, ub * dvdx + vi * dvdy, 0.0))
+        if heredar:   # frente de mojado: la cara que se activa hereda la velocidad de la vecina del lado mojado
+            lw = h[:, :-1] > dmin; rw = h[:, 1:] > dmin
+            vl = np.pad(ui, ((0, 0), (1, 0)), mode='edge')[:, :-1]; vr = np.pad(ui, ((0, 0), (0, 1)), mode='edge')[:, 1:]
+            nuevo = ax & (ui == 0)
+            un = np.where(nuevo & lw & ~rw, vl, np.where(nuevo & rw & ~lw, vr, un))
+            lw = h[:-1, :] > dmin; rw = h[1:, :] > dmin
+            vl = np.pad(vi, ((1, 0), (0, 0)), mode='edge')[:-1, :]; vr = np.pad(vi, ((0, 1), (0, 0)), mode='edge')[1:, :]
+            nuevo = ay & (vi == 0)
+            vn = np.where(nuevo & lw & ~rw, vl, np.where(nuevo & rw & ~lw, vr, vn))
+        # fricción de Manning semi-implícita: g n² |U| u / D^(4/3), con |U| la rapidez total en la cara
+        un = un / (1.0 + dt * n2g * np.sqrt(un ** 2 + vb ** 2) / Dxi ** (4.0 / 3.0))
+        vn = vn / (1.0 + dt * n2g * np.sqrt(vn ** 2 + ub ** 2) / Dyi ** (4.0 / 3.0))
+        u[:, 1:-1] = np.clip(np.where(ax, un, 0.0), -umax, umax); v[1:-1, :] = np.clip(np.where(ay, vn, 0.0), -umax, umax)
+        # fronteras: radiación M = ±√(gH) η (u = M/D) o pared
+        eta = mojada()
+        if frontera == 'abierta':
+            Dw = np.maximum(h[:, 0], dmin); De = np.maximum(h[:, -1], dmin); Ds = np.maximum(h[0, :], dmin); Dn = np.maximum(h[-1, :], dmin)
+            u[:, 0] = -c[:, 0] * eta[:, 0] / Dw; u[:, -1] = c[:, -1] * eta[:, -1] / De
+            v[0, :] = -c[0, :] * eta[0, :] / Ds; v[-1, :] = c[-1, :] * eta[-1, :] / Dn
+        else:
+            u[:, 0] = 0; u[:, -1] = 0; v[0, :] = 0; v[-1, :] = 0
+        np.maximum(maxeta, np.where(sea, eta, -1e9), out=maxeta)
+        np.maximum(maxh_tierra, np.where(~sea, h, 0.0), out=maxh_tierra)
+        if n % 5 == 0:
+            nuevo = np.isnan(tarr) & (eta > umbral); tarr[nuevo] = n * dt
+        if rec is not None:
+            rec[n] = eta[ij[:, 0], ij[:, 1]]
+        if n % cada == 0:
+            snap_t.append(n * dt); snaps.append(eta.astype('float16'))
+    return dict(maxeta=np.where(maxeta < -1e8, 0, maxeta).astype('float32'), tarr=tarr, snap_t=np.array(snap_t),
+                snaps=np.array(snaps), rec=rec, dt=dt, cfl=cfl, inund=maxh_tierra.astype('float32'), h=h)
+
+print('✓ Solver NSWE definido')
+'''),
+    md("""
 ## 3. Verificación del solver
 
 Una onda plana en un canal de 1 000 m de profundidad debe viajar a $c=\\sqrt{gH}$ sin perder amplitud. Se compara con el esquema de Lax-Friedrichs de la
@@ -437,6 +568,66 @@ assert np.abs(r0['maxeta']).max() == 0.0
 print('✓ Reposo exacto; ✓ onda plana')
 '''),
     md("""
+### 3b. Verificación del solver NSWE
+
+Cinco pruebas, todas con aserciones: (1) **reposo exacto** en una playa; (2) la **onda plana** de la sección 3 debe propagarse como en las LSWE (con amplitud pequeña la no linealidad y la fricción casi no actúan);
+(3) **conservación de la masa** en una cuenca cerrada con playa, donde el tsunami inunda la tierra; (4) el **cuenco parabólico** unidimensional (el caso de celda seca de Madden et al., 2023),
+contra su solución exacta, que se obtiene integrando la reducción a ecuaciones diferenciales ordinarias (profundidad $\\alpha(t)-\\beta(t)x^2$ y velocidad $\\gamma(t)x$); y (5) el **efecto de la fricción**: con rugosidad el agua avanza menos sobre la playa.
+"""),
+    code('''
+# (1) Reposo con playa: la profundidad en reposo no cambia nada
+nxp, nyp, dxp = 200, 6, 100.
+xp_ = (np.arange(nxp) + .5) * dxp
+zp = np.tile(np.where(xp_ < 12000, -50 + xp_ / 12000 * 50, (xp_ - 12000) / 1000 * 5), (nyp, 1))
+r1 = run_nswe(zp, dxp, np.where(zp < 0, -zp, 0.), 1., 600., 600., frontera='pared')
+assert np.abs(r1['snaps'][-1].astype('float64')).max() == 0.0 and r1['inund'].max() == 0.0
+print('✓ (1) reposo exacto en una playa')
+
+# (2) Onda plana: la misma de la sección 3
+rN = run_nswe(np.full((nyt, nxt), -Ht), dxt, Ht + e0, 1.0, Tt, Tt, frontera='pared')
+derN = rN['snaps'][-1].astype('float64')[nyt // 2, nxt // 2:]
+amp_N = derN.max(); pos_N = (np.argmax(derN) + nxt // 2) * dxt - x0
+print(f'✓ (2) onda plana NSWE: pico a {pos_N/1e3:.1f} km (esperado {np.sqrt(G*Ht)*Tt/1e3:.1f}), amplitud {amp_N:.3f} m (LSWE: {amp_C:.3f}; ideal 0,500)')
+assert amp_N > 0.49 and abs(pos_N - np.sqrt(G * Ht) * Tt) < 2 * dxt
+
+# (3) Masa en una cuenca cerrada con inundación de la playa
+e0p = np.tile(np.where(xp_ < 12000, 3 * np.exp(-0.5 * ((xp_ - 8000) / 1500) ** 2), 0.), (nyp, 1))
+h0p = np.where(zp < 0, -zp + e0p, 0.)
+r3 = run_nswe(zp, dxp, h0p, 1., 3600., 3600., frontera='pared')
+dm = (r3['h'].astype('float64').sum() - h0p.sum()) / h0p.sum()
+print(f'✓ (3) masa: variación relativa {dm:.1e}; profundidad máxima sobre la playa {r3["inund"].max():.2f} m')
+assert abs(dm) < 1e-4 and r3['inund'].max() > 0.5
+
+# (4) Cuenco parabólico 1D: cuerpo de agua oscilante con orilla móvil contra su solución exacta
+def cuenco_exacto(a, h0, A, tmax, n=40000):
+    """Solución exacta del cuenco parabólico 1D (fondo h0(x/a)² - h0; profundidad α(t) - β(t)x², velocidad γ(t)x). Integra por RK4 la
+    reducción a EDO con α₀ = h0 √(1-A²)/(1-A) y β = (h0/a²)(α/h0)³ (conservación de masa). Devuelve t, α, β, γ."""
+    f = lambda y: np.array([-y[1] * y[0], -y[1] ** 2 + 2 * G * (h0 / a ** 2 * (y[0] / h0) ** 3 - h0 / a ** 2)])
+    y = np.array([h0 * np.sqrt(1 - A ** 2) / (1 - A), 0.]); d_ = tmax / n; sal = [(0., *y)]
+    for i in range(n):
+        k1 = f(y); k2 = f(y + d_ / 2 * k1); k3 = f(y + d_ / 2 * k2); k4 = f(y + d_ * k3)
+        y = y + d_ / 6 * (k1 + 2 * k2 + 2 * k3 + k4); sal.append(((i + 1) * d_, *y))
+    o = np.array(sal); return o[:, 0], o[:, 1], h0 / a ** 2 * (o[:, 1] / h0) ** 3, o[:, 2]
+
+ac, h0c, Ac = 3000., 10., 0.5
+tc, alc, bec, gac = cuenco_exacto(ac, h0c, Ac, 2000.)
+Tc = tc[np.where((gac[:-1] < 0) & (gac[1:] >= 0))[0][0]]             # periodo no lineal (primer cruce de γ por cero hacia arriba)
+errs = {}
+for dxc in (100., 50., 25.):
+    xc = (np.arange(int(8 * ac / dxc)) + .5) * dxc - 4 * ac
+    zc = np.tile(h0c * (xc / ac) ** 2 - h0c, (5, 1))
+    pr_ = lambda i: np.maximum(alc[i] - bec[i] * xc ** 2, 0)
+    rc = run_nswe(zc, dxc, np.tile(pr_(0), (5, 1)), dxc / 50, Tc, Tc, frontera='pared', manning=1e-6)
+    ex_ = pr_(int(round(Tc / (tc[1] - tc[0])))); errs[dxc] = np.sqrt(((rc['h'][2] - ex_) ** 2).sum() / (ex_ ** 2).sum())
+print('✓ (4) cuenco parabólico, error relativo L2 de la profundidad tras un periodo (T = %.0f s): ' % Tc + ', '.join(f'{k:.0f} m: {v:.3f}' for k, v in errs.items()))
+assert errs[25.] < 0.05 and errs[25.] < errs[100.]
+
+# (5) La fricción de Manning reduce el avance sobre la playa
+r5 = run_nswe(zp, dxp, h0p, 1., 3600., 3600., frontera='pared', manning=0.0001)
+print(f'✓ (5) profundidad máxima sobre la playa: {r3["inund"].max():.2f} m con n = 0,025 y {r5["inund"].max():.2f} m con n ≈ 0')
+assert r3['inund'].max() < r5['inund'].max()
+'''),
+    md("""
 ## 4. Estaciones
 
 Cada estación de la tabla de observaciones se lleva a la **celda de mar más cercana con profundidad de al menos 10 m y a menos de 10 km**. Con 450 m de
@@ -472,20 +663,35 @@ def tabla_estaciones(H, tf, dx):
 est = tabla_estaciones(H, tf, DX)
 est
 '''),
-    md("## 5. Simulación (450 m, 110 min)"),
+    md("""
+## 5. Simulación (450 m, 110 min)
+
+Se corren los dos modelos con la misma fuente y la misma malla. **El modelo principal de la versión 3 es el no lineal (NSWE, Manning 0,025)**: sus resultados van a `output/resultados.npz`,
+que lee el cuaderno 3. Las LSWE se guardan en `output/resultados_lswe.npz` como línea de comparación. Las NSWE usan el terreno completo (`z`), de modo que el agua puede avanzar sobre tierra.
+"""),
     code('''
 import time
 ok = est[est.estado == 'ok']
 cel = [(int(r.fila), int(r.col)) for _, r in ok.iterrows()]
-t0 = time.time()
-res = run_lswe(H, DX, eta0, DT, T_END, OUT_EVERY, estaciones=cel)
-print(f'✓ {int(T_END/DT)} pasos en {time.time()-t0:.0f} s | CFL = {res["cfl"]:.2f} | η máx. (profundidad ≥ 10 m) = {res["maxeta"][H >= 10].max():.2f} m')
+comun = dict(H=H.astype('float32'), dt=DT, x0=tf.c, y0=tf.f, dx=DX, slip=slip, eta0=eta0, idx_est=ok.index.values)
 
-np.savez_compressed(OUT / 'resultados.npz', H=H.astype('float32'), maxeta=res['maxeta'], tarr=res['tarr'],
-                    snap_t=res['snap_t'], snaps=res['snaps'], rec=res['rec'], dt=DT,
-                    x0=tf.c, y0=tf.f, dx=DX, slip=slip, eta0=eta0, idx_est=ok.index.values)
+t0 = time.time()
+res_l = run_lswe(H, DX, eta0, DT, T_END, OUT_EVERY, estaciones=cel)
+print(f'LSWE: {int(T_END/DT)} pasos en {time.time()-t0:.0f} s | η máx. (profundidad ≥ 10 m) = {res_l["maxeta"][H >= 10].max():.2f} m')
+np.savez_compressed(OUT / 'resultados_lswe.npz', maxeta=res_l['maxeta'], tarr=res_l['tarr'], snap_t=res_l['snap_t'], snaps=res_l['snaps'], rec=res_l['rec'], **comun)
+
+z, _ = cargar_z(DX)
+h_ini = np.where(z < 0, -z + eta0, 0.0)                     # agua inicial: profundidad en reposo + deformación del fondo
+print(f'Celdas de mar donde la deformación negativa deja menos de 0 m de agua (se recortan a 0): {int((h_ini < 0).sum())}')
+t0 = time.time()
+res = run_nswe(z, DX, h_ini, DT, T_END, OUT_EVERY, estaciones=cel, manning=0.025)
+print(f'NSWE: {int(T_END/DT)} pasos en {time.time()-t0:.0f} s | CFL = {res["cfl"]:.2f} | η máx. (profundidad ≥ 10 m) = {res["maxeta"][H >= 10].max():.2f} m')
+print(f'      inundación en tierra: {int((res["inund"] > 0.5).sum())} celdas de 450 m con más de 0,5 m de agua (máx. {res["inund"].max():.1f} m); solo indicativa')
+
+np.savez_compressed(OUT / 'resultados.npz', maxeta=res['maxeta'], tarr=res['tarr'], snap_t=res['snap_t'], snaps=res['snaps'], rec=res['rec'],
+                    inund=res['inund'], z=z.astype('float32'), manning=0.025, **comun)
 est.to_csv(OUT / 'estaciones.csv', index=False)
-print('Guardado en', OUT / 'resultados.npz')
+print('Guardado en', OUT / 'resultados.npz', 'y', OUT / 'resultados_lswe.npz')
 '''),
     md("""
 ## 6. Sensibilidad
@@ -533,6 +739,40 @@ sens = pd.DataFrame(filas).set_index('caso')
 sens.to_csv(OUT / 'sensibilidad.csv')
 sens.T
 '''),
+    md("""
+### 6b. Sensibilidad de las NSWE: no linealidad y fricción
+
+Con la malla de 900 m se compara el modelo lineal con el no lineal y se varía el coeficiente de Manning (0,015 a 0,040 s·m⁻¹ᐟ³, el intervalo habitual para fondos y costas; **no se calibró**).
+El caso «sin fricción» usa $n = 10^{-4}$. Se informa también el número de celdas de 900 m con más de 0,5 m de agua sobre tierra, que es solo un indicador relativo.
+"""),
+    code('''
+def correr_nswe(dx, dt, esc, manning):
+    """Corre las NSWE (110 min) con paso espacial `dx` (m) y Manning `manning`. Devuelve, por estación, (η máxima en m, primer instante con η > 0,1 m en min) y las celdas de tierra con más de 0,5 m de agua."""
+    zz, tff = cargar_z(dx); Hh = np.where(zz < 0, -zz, 0.0)
+    e0, _ = eta_inicial(tff, Hh.shape, esc); e0 = np.where(Hh > 0, e0, 0.0)
+    ee = tabla_estaciones(Hh, tff, dx); oo = ee[ee.estado == 'ok']
+    rr = run_nswe(zz, dx, np.where(zz < 0, -zz + e0, 0.0), dt, 6600., 6600., estaciones=[(int(a), int(b)) for a, b in zip(oo.fila, oo.col)], manning=manning)
+    tt_ = np.arange(rr['rec'].shape[0]) * dt; sal = {}
+    for k, nombre in enumerate(oo.estacion):
+        s_ = rr['rec'][:, k]; sal[nombre] = (s_.max(), tt_[np.argmax(s_ > 0.1)] / 60 if (s_ > 0.1).any() else np.nan)
+    return sal, int((rr['inund'] > 0.5).sum())
+
+filas_n = []
+base_l = correr(900., 2.0, ESC)
+fila = {'modelo': 'LSWE (sin fricción)'}
+for e_, (a, t_) in base_l.items():
+    fila[f'{e_} η máx (m)'] = round(float(a), 2); fila[f'{e_} arribo (min)'] = round(float(t_), 1)
+fila['celdas inundadas'] = 0; filas_n.append(fila)
+for nombre, n_ in {'NSWE, Manning 0,040': 0.040, 'NSWE, Manning 0,025': 0.025, 'NSWE, Manning 0,015': 0.015, 'NSWE, sin fricción': 1e-4}.items():
+    s_, ninund = correr_nswe(900., 2.0, ESC, n_)
+    fila = {'modelo': nombre}
+    for e_, (a, t_) in s_.items():
+        fila[f'{e_} η máx (m)'] = round(float(a), 2); fila[f'{e_} arribo (min)'] = round(float(t_), 1)
+    fila['celdas inundadas'] = ninund; filas_n.append(fila)
+sens_n = pd.DataFrame(filas_n).set_index('modelo')
+sens_n.to_csv(OUT / 'sensibilidad_nswe.csv')
+sens_n.T
+'''),
 ]
 
 # --------------------------------------------------------------------------
@@ -549,7 +789,7 @@ Mapas, series de tiempo, control de calidad de las observaciones, comparación c
 
 **Qué es y qué no es la comparación.** Las observaciones de `data/observaciones_1979.csv` se reconstruyeron en la versión 2.2 con su procedencia: cada valor
 dice si viene de Herd et al. (1981) o de la base de run-ups de NOAA/NGDC, y **las dos fuentes no coinciden** (Tumaco: 0,8 m frente a 3 m; San Juan de la Costa: 2,5 m frente a 6 m).
-Por eso no se compara contra un número sino contra el **rango** entre fuentes. El modelo es lineal y sin inundación, de modo que su η en el mar **no es un run-up**.
+Por eso no se compara contra un número sino contra el **rango** entre fuentes. El modelo principal (NSWE de la versión 3, 450 m) tiene fricción y celda seca, pero una celda es más grande que la isla de Tumaco: su η en el mar y su inundación **no son un run-up**.
 Solo hay dos tiempos de arribo documentados (Buenaventura y Esmeraldas), así que la comparación de tiempos es mínima. Se muestran diferencias para ubicar el orden de
 magnitud y los límites del modelo, no para validarlo.
 """),
@@ -566,6 +806,7 @@ ny, nx = H.shape
 ext = [x0 / 1e3, (x0 + dx * nx) / 1e3, (y0 - dx * ny) / 1e3, y0 / 1e3]   # oeste a la izquierda, norte arriba
 est = pd.read_csv(OUT / 'estaciones.csv'); obs = pd.read_csv(datos('observaciones_1979.csv'))
 ex, ey = TR.transform(*EPI)
+tx_, ty_ = TR.transform(-78.80, 1.85)          # centro de la zona de Tumaco para los mapas de detalle
 tt = np.arange(rec.shape[0]) * dt
 print(f'Resultados: malla {nx}×{ny}, {len(snap_t)} instantáneas (0–{snap_t[-1]/60:.0f} min), {rec.shape[1]} estaciones en el mar')
 
@@ -623,7 +864,7 @@ ax.contour(np.linspace(ext[0], ext[1], nx), np.linspace(ext[3], ext[2], ny), H, 
 im = ax.imshow(np.where(H >= 10, np.maximum(maxeta, 0), np.nan), cmap='YlOrRd', vmin=0, vmax=5, extent=ext, alpha=.9)
 costa(ax); plt.colorbar(im, ax=ax, shrink=.75, label='η máxima en 110 min, profundidad ≥ 10 m (m)')
 ax.plot(ex / 1e3, ey / 1e3, '*', c='red', mec='k', ms=18, label='Epicentro 1979'); ax.legend(loc='upper left'); ejes_lonlat(ax)
-ax.set_title('Elevación máxima de la superficie del mar (LSWE, 0–110 min)')
+ax.set_title('Elevación máxima de la superficie del mar (NSWE, 0–110 min)')
 
 ax = axs[1]; fondo(ax)
 zona = (H >= 10) & (H < 200)
@@ -638,7 +879,7 @@ for _, r in qc.iterrows():
 ejes_lonlat(ax, paso=.25); ax.set_title('Zona costera de Tumaco (η máx. en plataforma)')
 plt.tight_layout(); plt.savefig(WORK / 'max_eta_map.png', dpi=130, bbox_inches='tight'); plt.show()
 print(f'η máxima (profundidad ≥ 10 m): {maxeta[H>=10].max():.2f} m | plataforma 10–200 m: {maxeta[zona].max():.2f} m')
-print(f'(en celdas de < 10 m el modelo lineal llega a {maxeta[H>0].max():.0f} m: amplificación sin fricción ni rotura, no se interpreta)')
+print(f'(en celdas de < 10 m el modelo llega a {maxeta[H>0].max():.0f} m: con 450 m de malla es amplificación en agua somera, no se interpreta)')
 '''),
     md("""
 ## 3. Series de tiempo y arribos
@@ -733,13 +974,49 @@ pub = pd.DataFrame([
     ['Altura máxima del tsunami, isla de Tumaco, escenario 1979 (modelo de banda ancha)', '1,88 m', 'Escobar et al. (2020), tabla 3'],
     ['Llegada de la primera ola a Tumaco', '22 min', 'Ávila-Guzmán et al. (2026)'],
     ['Run-up observado en Tumaco: Herd et al. (1981) / NOAA/NGDC', '0,8 m / 3 m', 'Herd et al. (1981), p. 442; registro NOAA 9742'],
-    ['Este cuaderno: η máxima en celdas de mar de 10-25 m, Tumaco', f'{sim.eta_max_m[tum].min():.1f}-{sim.eta_max_m[tum].max():.1f} m', 'LSWE lineal, 450 m'],
-    ['Este cuaderno: primer ascenso > 0,1 m en Tumaco', f'{sim.t_ascenso_sim_min[tum].min():.0f} min', 'LSWE lineal, 450 m']],
+    ['Este cuaderno: η máxima en celdas de mar de 10-25 m, Tumaco', f'{sim.eta_max_m[tum].min():.1f}-{sim.eta_max_m[tum].max():.1f} m', 'NSWE (Manning 0,025), 450 m'],
+    ['Este cuaderno: primer ascenso > 0,1 m en Tumaco', f'{sim.t_ascenso_sim_min[tum].min():.0f} min', 'NSWE (Manning 0,025), 450 m']],
     columns=['Magnitud', 'Valor', 'Fuente'])
 pub
 '''),
     md("""
-## 5. Sensibilidad (resumen del cuaderno 2)
+## 5. Comparación entre modelos: lineal (LSWE) y no lineal (NSWE)
+
+Misma fuente, misma malla y mismo paso de tiempo; solo cambian las ecuaciones. La diferencia entre las dos columnas mide cuánto pesan la **no linealidad, la fricción de Manning y la celda seca**
+en cada estación. Es una comparación entre modelos, **no una validación**: ninguno de los dos se calibró.
+"""),
+    code('''
+Rl_ruta = OUT / 'resultados_lswe.npz'
+if Rl_ruta.exists():
+    Rl = np.load(Rl_ruta); rec_l = Rl['rec']
+    cmp_m = []
+    for k, r in ok.iterrows():
+        sl, sn = rec_l[:, k], rec[:, k]
+        cmp_m.append(dict(estacion=r.estacion, eta_max_LSWE_m=sl.max(), eta_max_NSWE_m=sn.max(), razon_NSWE_LSWE=sn.max() / sl.max() if sl.max() > 0.1 else np.nan,
+                          ascenso_LSWE_min=primer(sl, +1), ascenso_NSWE_min=primer(sn, +1)))
+    cmp_m = pd.DataFrame(cmp_m).round(2)
+    hh = H >= 10
+    print(f'η máxima (profundidad ≥ 10 m): LSWE {Rl["maxeta"][hh].max():.2f} m | NSWE {maxeta[hh].max():.2f} m')
+    print(f'η máxima en la plataforma de 10–200 m: LSWE {Rl["maxeta"][zona].max():.2f} m | NSWE {maxeta[zona].max():.2f} m')
+    k_t = int(np.where(ok.estacion == 'Tumaco')[0][0])
+    fig, axs = plt.subplots(1, 2, figsize=(14, 4.2))
+    axs[0].plot(tt / 60, rec_l[:, k_t], c='#8c99a6', lw=1.3, label='LSWE (lineal, sin fricción)'); axs[0].plot(tt / 60, rec[:, k_t], c='#0154a5', lw=1.5, label='NSWE (Manning 0,025)')
+    axs[0].axhline(0, c='k', lw=.4); axs[0].set_xlabel('Tiempo desde el sismo (min)'); axs[0].set_ylabel('η (m)'); axs[0].grid(alpha=.3); axs[0].legend(fontsize=8)
+    axs[0].set_title('Celda de mar de Tumaco (%.0f m de profundidad)' % ok.H_celda_m[k_t])
+    inund = R['inund']
+    fondo(axs[1]); im = axs[1].imshow(np.where(inund > 0.01, inund, np.nan), cmap='Blues', vmin=0, vmax=5, extent=ext)
+    costa(axs[1]); plt.colorbar(im, ax=axs[1], shrink=.8, label='Profundidad máxima de agua sobre tierra (m)')
+    axs[1].set_xlim(tx_ / 1e3 - 60, tx_ / 1e3 + 60); axs[1].set_ylim(ty_ / 1e3 - 60, ty_ / 1e3 + 60); ejes_lonlat(axs[1], paso=.25)
+    axs[1].set_title('Agua sobre tierra en celdas de 450 m (indicativo)')
+    plt.tight_layout(); plt.savefig(WORK / 'comparacion_modelos.png', dpi=130, bbox_inches='tight'); plt.show()
+    print(f'Tierra con más de 0,5 m de agua: {int((inund > 0.5).sum())} celdas de 450 m ({(inund > 0.5).sum() * dx**2 / 1e6:.0f} km²); máxima {inund.max():.1f} m. '
+          'Con celdas más grandes que la isla de Tumaco esto no es un mapa de inundación.')
+    display(cmp_m)
+else:
+    print('Falta output/resultados_lswe.npz: ejecute el cuaderno 2.')
+'''),
+    md("""
+## 6. Sensibilidad (resumen del cuaderno 2)
 """),
     code('''
 sp = OUT / 'sensibilidad.csv'
@@ -750,9 +1027,12 @@ if sp.exists():
     display(sens[[c for c in sens.columns if 'arribo' in c]].describe().loc[['min', 'max']].T.round(1).rename(columns={'min': 'mínimo', 'max': 'máximo'}))
 else:
     print('Ejecute la sección 6 del cuaderno 2 para generar output/sensibilidad.csv')
+sn_ = OUT / 'sensibilidad_nswe.csv'
+if sn_.exists():
+    display(pd.read_csv(sn_, index_col=0).T)
 '''),
     md("""
-## 6. Animación de la propagación
+## 7. Animación de la propagación
 
 Mapa con el **oeste a la izquierda y el norte arriba**; la estrella marca el epicentro y la falla se muestra con su proyección. η en metros (|η| < 0,1 m se deja transparente).
 """),
@@ -775,7 +1055,7 @@ titulo = ax.set_title('')
 def cuadro(k):
     """Actualiza el cuadro `k` de la animación: la elevación del agua (m) donde supera 0,1 m en mar de al menos 10 m de profundidad. Devuelve los artistas modificados."""
     e = snaps[k].astype('float32'); agua.set_array(np.where((np.abs(e) > 0.1) & (H >= 10), e, np.nan))
-    titulo.set_text(f't = {snap_t[k]/60:.0f} min — Tsunami de Tumaco 1979 (LSWE)')
+    titulo.set_text(f't = {snap_t[k]/60:.0f} min — Tsunami de Tumaco 1979 (NSWE)')
     return [agua, titulo]
 
 anim = FuncAnimation(fig, cuadro, frames=len(snap_t), interval=250, blit=False)
@@ -788,10 +1068,10 @@ print(f'✓ Animación: {len(snap_t)} cuadros, t = 0–{snap_t[-1]/60:.0f} min, 
 from IPython.display import Image, display
 display(Image(str(gif)))
 '''),
-    md("## 7. Resumen"),
+    md("## 8. Resumen"),
     code('''
-print('=' * 62); print('RESUMEN — TSUNAMI DE TUMACO 1979 (versión 2)'); print('=' * 62)
-print(f'  Modelo:              LSWE, malla escalonada, {dx:.0f} m, dt = {dt:.0f} s')
+print('=' * 62); print('RESUMEN — TSUNAMI DE TUMACO 1979 (versión 3)'); print('=' * 62)
+print(f'  Modelo:              NSWE con Manning {float(R["manning"]):g}, malla escalonada, {dx:.0f} m, dt = {dt:.0f} s')
 print(f'  Fuente:              Okada (1985), Mw {8.3}, deslizamiento uniforme {float(R["slip"]):.1f} m (geometría supuesta)')
 print(f'  η máx. (≥ 10 m prof.): {maxeta[H>=10].max():.2f} m | plataforma 10–200 m: {maxeta[zona].max():.2f} m')
 print(f'  Estaciones:          {len(sim)} comparables de {len(obs)} (resto excluido, ver sección 4)')

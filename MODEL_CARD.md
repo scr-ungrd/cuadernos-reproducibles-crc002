@@ -4,10 +4,10 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 ## 1. Propósito y uso previsto
 
-- **Modelo:** propagación de un tsunami con las ecuaciones de aguas someras lineales (LSWE) en malla escalonada, con una fuente de dislocación elástica de Okada (1985). Es un modelo físico, no de aprendizaje automático.
+- **Modelo:** propagación de un tsunami con las ecuaciones de aguas someras no lineales (NSWE) con fricción de Manning y celda seca en malla escalonada, con una fuente de dislocación elástica de Okada (1985); las lineales (LSWE) de la versión 2 se conservan como comparación. Se inspira en Madden et al. (2023), pero no usa TPU ni su esquema numérico. Es un modelo físico, no de aprendizaje automático.
 - **Versión:** 2.2.2 (2026-11-17; DOI 10.5281/zenodo.24324555; DOI de todas las versiones 10.5281/zenodo.24322477). **Autoría:** Subdirección para el Conocimiento del Riesgo, UNGRD. **Licencia:** código MIT; texto y figuras CC BY 4.0.
 - **Uso previsto:** estimar el tiempo de arribo y comparar escenarios de la propagación del tsunami del 12 de diciembre de 1979 hacia Tumaco, con fines educativos y de método. Por qué un modelo físico: el evento tiene pocas observaciones y no permite entrenar un modelo estadístico.
-- **Usos no previstos:** mapas de amenaza o de inundación (las LSWE no calculan inundación en tierra), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
+- **Usos no previstos:** mapas de amenaza o de inundación (a 450 m la inundación en tierra de las NSWE es solo indicativa), dimensionar obras o tasas de daño con las amplitudes, y decisiones de evacuación o de ordenamiento territorial.
 - **Límites de validez:** Pacífico colombo-ecuatoriano (0,2° S a 4,2° N, 81,2° a 76,9° O); un escenario (Mw 8,3); malla de 450 m; 110 minutos de simulación.
 - **Revisión previa a una decisión:** debe revisar el resultado una persona experta en tsunamis de la SCR. La revisión la coordina Mauricio Romero Torres (SCR-UNGRD).
 
@@ -20,7 +20,7 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 ## 3. Descripción del método
 
-- **Ecuaciones:** LSWE linealizadas, esquema de diferencias finitas en malla escalonada, sin difusión numérica y sin fricción (sección «Esquema numérico» del artículo).
+- **Ecuaciones:** NSWE en forma de velocidad con fricción de Manning (n = 0,025 s·m⁻¹ᐟ³, valor típico **sin calibrar**) y celda seca; diferencias finitas en malla escalonada con paso *forward-backward*, advección contra-corriente de primer orden y aritmética de 32 bits. No representa la rotura ni los resaltos hidráulicos. Las LSWE (sin fricción) se corren como comparación (sección «Esquema numérico» del artículo).
 - **Fuente:** falla rectangular de Okada: Mw 8,3, 200 × 80 km, rumbo 30°, buzamiento 15°, ángulo de desplazamiento 90°, borde superior a 12 km, rigidez 30 GPa, Poisson 0,25, deslizamiento 7,4 m. **La geometría es un supuesto**; la magnitud viene de la literatura.
 - **Numérica:** malla de 1 065 × 1 084 celdas de 450 m (UTM 17N), paso de 1 s (CFL = 0,70), 6 600 s (110 min), instantáneas cada 240 s.
 - **Parámetros ajustados:** ninguno; no hay hiperparámetros ni selección con datos de prueba.
@@ -29,9 +29,9 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 
 ## 4. Validación y desempeño
 
-- **Verificación numérica:** deformación de Okada contra `pyrocko` (diferencia menor que 1e-5 m en tres geometrías), onda plana contra la solución exacta, estado de reposo exacto y fuente ligada al epicentro (prueba automática).
-- **Comparación con observaciones:** siete estaciones comparables. Hay dos tiempos documentados: en Buenaventura la primera ola positiva (99 min) **no aparece en el modelo** (η máx. −0,01 m en la celda de 5 m), y en Esmeraldas el retroceso coincide en signo, no en tiempo. La razón η simulada / run-up va de 0,12 a 5,7 según la estación y la fuente (Tumaco: 5,7 veces el valor de Herd y 1,5 el de NOAA/NGDC). **No se calcula RMSE ni R²**: las fuentes se contradicen.
-- **Contraste con la literatura:** 22 min de primer ascenso en Tumaco frente a 22 min de TUNAMI-N2 (Ávila-Guzmán et al., 2026). La amplitud en la celda de Tumaco (4,6 m) es unas dos veces la de Escobar et al. (2020).
+- **Verificación numérica:** deformación de Okada contra `pyrocko` (diferencia menor que 1e-5 m en tres geometrías), onda plana contra la solución exacta, estado de reposo exacto y fuente ligada al epicentro (prueba automática). Para las NSWE: reposo exacto en una playa, onda plana, conservación de la masa (variación relativa de 1e-8 en una cuenca cerrada con inundación), cuenco parabólico unidimensional contra su solución exacta (error relativo L2 de la profundidad tras un periodo: 9,5 % a 100 m, 4,4 % a 50 m y 2,1 % a 25 m) y menor avance sobre una playa con fricción. No se comparó con GeoClaw ni con `tsunamiTPUlab`.
+- **Comparación con observaciones:** siete estaciones comparables. Hay dos tiempos documentados: en Buenaventura la primera ola positiva (99 min) **no aparece en el modelo** (η máx. −0,01 m en la celda de 5 m), y en Esmeraldas el retroceso coincide en signo, no en tiempo. La razón η simulada / run-up va de 0,08 a 4,6 según la estación y la fuente (Tumaco: 4,6 veces el valor de Herd y 1,2 el de NOAA/NGDC). **No se calcula RMSE ni R²**: las fuentes se contradicen.
+- **Contraste con la literatura:** 22 min de primer ascenso en Tumaco frente a 22 min de TUNAMI-N2 (Ávila-Guzmán et al., 2026). La amplitud en la celda de Tumaco (3,7 m con las NSWE; 4,6 m con las LSWE) es de 1,6 a 2,0 veces la de Escobar et al. (2020).
 - **No es una validación independiente.** Línea base simple y *back-testing*: no se hicieron. La revisión por una persona experta del dominio no se ha hecho.
 - **Casos de fallo conocidos:** sobreestima la amplitud en Tumaco y la subestima en San Juan de la Costa, Isla Gorgona y Guapi; no calcula inundación; no reproduce la primera ola positiva observada en Buenaventura.
 
@@ -58,6 +58,6 @@ Conforme al «Estándar de modelos» de la colección de Cuadernos Reproducibles
 ## 8. Documentación y ciclo de vida
 
 - `README.md`, `CHANGELOG.md` (versionado semántico), `CITATION.cff`, `DATA_STATEMENT.md` y `AI_USE.md`.
-- **Obsolescencia:** el modelo se reemplaza cuando haya una versión no lineal con la distribución de deslizamiento de Poveda y Pulido (2019) y observaciones verificadas. Decide Mauricio Romero Torres (SCR-UNGRD).
+- **Obsolescencia:** el modelo se reemplaza cuando haya una versión con un esquema conservativo de orden alto, malla anidada y la distribución de deslizamiento de Poveda y Pulido (2019) y observaciones verificadas. Decide Mauricio Romero Torres (SCR-UNGRD).
 - **Uso de IA:** declarado en `AI_USE.md`.
 - No se publica en un repositorio de modelos (no hay pesos).

@@ -13,6 +13,8 @@ El desarrollo de este cuaderno contó con la asistencia de un modelo de IA de la
 - **Datos enviados a la herramienta:** el PDF de Herd et al. (1981), un artículo de *Science* con derechos del editor, que la persona autora aportó para extraer los valores de run-up y los tiempos de arribo (corregido el 2026-11-17; si ese uso es aceptable debe decidirlo una persona). Ningún otro dato enviado era no público. El 2026-11-17 se contrastaron 13 valores extraídos de ese artículo con el PDF y se corrigió 1 error (Guapi); ver `metadata/validacion_herd.md` (el contraste lo hizo el mismo modelo, no una persona). Los datos del repositorio son públicos y no contienen datos personales.
 - **Prompts y salidas:** no se conservan los prompts de las sesiones.
 
+- **Uso del 2026-11-18 (sin confirmar en el historial ni revisado por una persona):** en una sesión de Claude Code se añadieron el solver de aguas someras no lineales, sus pruebas, la sensibilidad, la sección sobre Madden et al. (2023) y la actualización de cifras y textos. Los cambios están sin confirmar en git; **la revisión humana de estos cambios está pendiente**.
+
 El artículo incluye un aviso de que no ha sido validado por una persona experta y de que no debe usarse para tomar decisiones.
 
 ## Registro de usos
