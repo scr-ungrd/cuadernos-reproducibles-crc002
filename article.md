@@ -18,6 +18,16 @@ Este cuaderno **no ha sido validado por una persona experta** en modelación de 
 Falta, como mínimo: la revisión por una persona experta; la distribución de deslizamiento real del evento (la geometría de la falla es un supuesto); la validación contra observaciones de 1979, que hoy se contradicen entre fuentes (Herd et al., 1981 y NOAA/NGDC); y una malla y una topografía finas en la costa (a 450 m la inundación que calcula el modelo no lineal es solo indicativa y las amplitudes simuladas son poco confiables).
 :::
 
+## Stack
+
+```text
+Herramienta principal: Python 3.11 con numpy, pandas y matplotlib
+Datos base:            Batimetría NOAA/NCEI (15 s) y run-up de Herd et al. (1981)
+Escenarios:            Mw 8,3 (fuente de Okada, geometría supuesta), aguas someras no lineales
+Punto de análisis:     Tumaco, Nariño (0,2° S a 4,2° N, 81,2° a 76,9° O)
+Ejecución recomendada: Google Colab con runtime CPU
+```
+
 +++ {"part": "abstract"}
 
 El 12 de diciembre de 1979 un terremoto de la zona de subducción colombo-ecuatoriana generó un tsunami que causó cerca de 452 muertes en Nariño {cite:p}`escobar2020tsunami`.

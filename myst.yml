@@ -67,6 +67,9 @@ project:
       article: article.md
       output: article.pdf
       template: ./_templates/plain-typst-article
+      titulo_breve: Tsunami Tumaco 1979
+      version: v2.2.2
+      colab: https://colab.research.google.com/github/scr-ungrd/cuadernos-reproducibles-crc002/blob/main/notebooks/03-visualization.ipynb
       id: article-pdf
   jupyter: true
 site:
